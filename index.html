@@ -164,6 +164,23 @@
   .fb-btn-sm{padding:7px 13px;font-size:13px}
   .fb-btn-sm .svg-icon{width:14px;height:14px}
 
+  /* MONTH BADGE */
+  .month-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:var(--r-p);
+    font-size:12px;font-weight:700;letter-spacing:.2px;
+    white-space:nowrap;transition:.2s;
+  }
+  .month-badge::before{
+    content:'';width:7px;height:7px;border-radius:50%;background:currentColor;
+    flex-shrink:0;
+  }
+  .month-badge.current{background:var(--blue-l);color:var(--blue)}
+  .month-badge.current.has{background:var(--green-l);color:var(--green)}
+  .month-badge.past{background:var(--in-bg);color:var(--text2)}
+  .month-badge.past.has{background:var(--green-l);color:var(--green)}
+  .month-badge.future{background:var(--red-l);color:var(--red)}
+
   .fb-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--div-s);
     -webkit-overflow-scrolling:touch}
   table.fb-table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--card)}
@@ -207,14 +224,6 @@
   .fb-stat.highlight .label{color:rgba(255,255,255,.75)}
   .fb-stat.highlight .value{color:#fff;font-size:22px}
 
-  .fb-note{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;
-    background:var(--blue-l);border-radius:var(--r);margin-bottom:14px;
-    font-size:13.5px;line-height:1.5;color:var(--text)}
-  .fb-note-icon{color:var(--blue);flex-shrink:0}
-  .fb-note-close{margin-left:auto;background:none;border:none;color:var(--text2);
-    font-size:20px;line-height:1;padding:0 4px;flex-shrink:0;cursor:pointer}
-  .fb-note strong{color:var(--blue)}
-
   .sub-tabs{display:flex;gap:4px;padding:8px;background:var(--in-bg);
     border-radius:var(--r);margin-bottom:18px;overflow-x:auto;scrollbar-width:none}
   .sub-tabs::-webkit-scrollbar{display:none}
@@ -226,23 +235,6 @@
   .sub-tab:hover:not(.active){background:rgba(255,255,255,.5)}
   .sub-tab-content{display:none}
   .sub-tab-content.active{display:block}
-
-  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;
-    display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px)}
-  .modal-backdrop.show{display:flex}
-  .modal-box{background:var(--card);border-radius:var(--r-lg);width:100%;
-    max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;
-    box-shadow:var(--sh-lg)}
-  .modal-header{display:flex;justify-content:space-between;align-items:center;
-    padding:16px 20px;border-bottom:1px solid var(--div-s);flex-shrink:0}
-  .modal-header h3{font-size:17px;font-weight:700;letter-spacing:-.2px}
-  .modal-close{width:36px;height:36px;border-radius:50%;background:var(--in-bg);
-    border:none;color:var(--text);display:inline-flex;align-items:center;
-    justify-content:center;transition:.15s}
-  .modal-close:hover{background:var(--div-s)}
-  .modal-scroll{padding:20px;overflow-y:auto;flex:1}
-  .modal-footer{padding:16px 20px;border-top:1px solid var(--div-s);
-    display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;background:var(--card);flex-shrink:0}
 
   .bill-hero{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--sh);
     padding:28px 24px;text-align:center;margin-bottom:14px}
@@ -300,7 +292,6 @@
     .bill-pc-layout{display:grid;grid-template-columns:1fr 400px;gap:16px;align-items:start}
   }
 
-  /* ============ MONTH CARD (LỊCH SỬ) ============ */
   .month-card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--sh);
     margin-bottom:12px;overflow:hidden}
   .month-header{display:flex;justify-content:space-between;align-items:center;
@@ -427,16 +418,14 @@
 
   <main class="app-main">
     <section class="app-tab active" data-tab-content="home">
-      <div class="fb-note" id="homeNote">
-        <span class="fb-note-icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
-        <div style="flex:1"><strong>Thu tiền tháng 9 →</strong> chọn <strong>2026-09</strong> ở ô chọn tháng. Cột <strong>TT</strong> để đánh dấu phòng đã nộp.</div>
-        <button class="fb-note-close" onclick="document.getElementById('homeNote').style.display='none'">×</button>
-      </div>
-
+      <!-- Hóa đơn tổng -->
       <div class="fb-panel">
         <div class="fb-panel-head">
           <h3><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Hóa đơn tổng</h3>
-          <input type="month" id="selectedMonth" class="fb-input" onchange="onMonthChange()" style="width:auto;padding:9px 14px">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span class="month-badge" id="monthStatusBadge">—</span>
+            <input type="month" id="selectedMonth" class="fb-input" onchange="onMonthChange()" style="width:auto;padding:9px 14px">
+          </div>
         </div>
         <div class="fb-panel-body">
           <div class="fb-grid">
@@ -450,19 +439,10 @@
         </div>
       </div>
 
+      <!-- Chỉ số tiêu thụ -->
       <div class="fb-panel">
         <div class="fb-panel-head">
           <h3><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Chỉ số tiêu thụ</h3>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="fb-btn admin-only fb-btn-sm" onclick="rollOverPreviousMonth()">
-              <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Lấy số T.trước
-            </button>
-            <button class="fb-btn fb-btn-primary admin-only fb-btn-sm" onclick="addRoom()">
-              <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Thêm phòng
-            </button>
-          </div>
         </div>
         <div class="fb-panel-body flush">
           <div class="fb-table-wrap" style="margin:0 14px">
@@ -491,6 +471,7 @@
         </div>
       </div>
 
+      <!-- Thống kê + hành động -->
       <div class="fb-panel">
         <div class="fb-panel-body full-pad">
           <div class="fb-stats">
@@ -516,6 +497,7 @@
         </div>
       </div>
 
+      <!-- Zalo preview -->
       <div class="fb-panel" id="zaloPreviewCard" style="display:none">
         <div class="fb-panel-head">
           <h3><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Tin nhắn gửi từng phòng</h3>
@@ -524,7 +506,7 @@
       </div>
     </section>
 
-    <!-- HISTORY - accordion từng tháng -->
+    <!-- HISTORY -->
     <section class="app-tab" data-tab-content="history">
       <div class="fb-panel">
         <div class="fb-panel-head">
@@ -536,17 +518,52 @@
       </div>
     </section>
 
+    <!-- SETTINGS -->
     <section class="app-tab" data-tab-content="settings">
       <div class="fb-panel">
         <div class="fb-panel-body full-pad">
           <div class="sub-tabs">
-            <button class="sub-tab active" onclick="switchSettingsTab('round', this)">Làm tròn</button>
+            <button class="sub-tab active" onclick="switchSettingsTab('rooms', this)">Phòng</button>
+            <button class="sub-tab" onclick="switchSettingsTab('round', this)">Làm tròn</button>
             <button class="sub-tab" onclick="switchSettingsTab('security', this)">Bảo mật</button>
             <button class="sub-tab" onclick="switchSettingsTab('users', this)">Users</button>
             <button class="sub-tab" onclick="switchSettingsTab('bank', this)">Ngân hàng</button>
           </div>
 
-          <div class="sub-tab-content active" id="subtab-round">
+          <!-- TAB PHÒNG -->
+          <div class="sub-tab-content active" id="subtab-rooms">
+            <div class="fb-field" style="margin-bottom:20px">
+              <label class="fb-label">Thao tác nhanh</label>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+                <button class="fb-btn fb-btn-primary" onclick="addRoom()">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Thêm phòng mới
+                </button>
+                <button class="fb-btn" onclick="rollOverPreviousMonth()">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Lấy số tháng trước
+                </button>
+              </div>
+            </div>
+
+            <div class="fb-field" style="margin-bottom:12px">
+              <label class="fb-label">Danh sách phòng hiện tại</label>
+            </div>
+            <div class="fb-table-wrap">
+              <table class="fb-table" style="min-width:480px">
+                <thead>
+                  <tr><th>Tên phòng</th><th>Số cũ (điện/nước)</th><th>Trạng thái</th><th>Xóa</th></tr>
+                </thead>
+                <tbody id="roomsManageBody"></tbody>
+              </table>
+            </div>
+            <p class="text-muted mt-12">
+              <strong>Thêm phòng</strong>: thêm phòng trống vào bảng chỉ số trang chủ.<br>
+              <strong>Lấy số tháng trước</strong>: tự động điền số cũ = số mới của tháng liền trước.
+            </p>
+          </div>
+
+          <div class="sub-tab-content" id="subtab-round">
             <div class="fb-field" style="margin-bottom:16px">
               <label class="fb-label">Làm tròn đơn giá điện</label>
               <select id="settingRoundElec" class="fb-select" onchange="onSettingChange()">
@@ -703,9 +720,7 @@
 </div>
 
 <script>
-/* ============================================================
-   CONFIG — URL MỚI CỦA BẠN
-   ============================================================ */
+/* ============ CONFIG ============ */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoHB1FnaoAQ3z6pTUUP1qZsdczasVikyxKtS9syRq44-dqmVqVtk95-xupC_FPU9iy/exec";
 
 const BANKS = {
@@ -742,7 +757,7 @@ if (!storage.settings) storage.settings = { roundElec:'ceil1000', roundWater:'ce
 if (!storage.history) storage.history = {};
 localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
 
-/* ========== FORMAT ========== */
+/* ============ FORMAT ============ */
 function formatNumber(num) {
   if (num === null || num === undefined || isNaN(num) || num === '') return '';
   return num.toString().replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -768,8 +783,17 @@ function formatMonthLong(m) {
   if (p.length !== 2) return m;
   return `Tháng ${parseInt(p[1])}/${p[0]}`;
 }
+function currentMonthStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+function prevMonthStr(month) {
+  const [y, m] = month.split('-').map(Number);
+  const d = new Date(y, m - 2, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
 
-/* ========== REMEMBER ========== */
+/* ============ REMEMBER ============ */
 function saveRememberedLogin(u, p) {
   try {
     localStorage.setItem(REMEMBER_KEY, JSON.stringify({
@@ -793,7 +817,7 @@ function clearRememberedLogin() {
   try { localStorage.removeItem(REMEMBER_KEY); } catch(e){}
 }
 
-/* ========== FETCH ========== */
+/* ============ FETCH ============ */
 async function fetchCloud() {
   const url = SCRIPT_URL + '?_=' + Date.now();
   const controller = new AbortController();
@@ -803,17 +827,16 @@ async function fetchCloud() {
     clearTimeout(timer);
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
     const text = await res.text();
-    if (!text || text.trim() === '') throw new Error('Server trả về rỗng. Có thể chưa Deploy version mới.');
+    if (!text || text.trim() === '') throw new Error('Server trả về rỗng.');
     try { return JSON.parse(text); }
     catch (pe) { throw new Error('Server không trả JSON: ' + text.substring(0, 200)); }
   } catch (err) {
     clearTimeout(timer);
-    if (err.name === 'AbortError') throw new Error('Timeout sau 25 giây.');
+    if (err.name === 'AbortError') throw new Error('Timeout 25 giây.');
     if (err.message === 'Failed to fetch') {
       throw new Error(
         'Failed to fetch — không kết nối được server.\n\n' +
-        'Kiểm tra:\n' +
-        '1. Mở Apps Script → chọn TEST_checkFolder → Run\n' +
+        '1. Mở Apps Script → Run TEST_checkFolder → Allow\n' +
         '2. Deploy → Manage → Who has access = Anyone\n' +
         '3. Deploy → New version'
       );
@@ -824,7 +847,7 @@ async function fetchCloud() {
 
 function postViaIframe(data) {
   return new Promise((resolve) => {
-    const iframeName = 'sync_iframe_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const iframeName = 'sync_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     const iframe = document.createElement('iframe');
     iframe.name = iframeName;
     iframe.style.cssText = 'position:absolute;width:0;height:0;border:0;visibility:hidden';
@@ -856,7 +879,7 @@ function postViaIframe(data) {
   });
 }
 
-/* ========== CLOUD STATUS ========== */
+/* ============ CLOUD ============ */
 function setCloudStatus(status, message) {
   const badge = currentRole === 'user'
     ? document.getElementById('cloudStatusUser')
@@ -920,17 +943,23 @@ async function saveAllToCloud(showAlert = false) {
   try {
     const cloudData = await fetchCloud();
     const usersMatch = JSON.stringify(cloudData.users || []) === JSON.stringify(storage.users || []);
+    const settingsMatch = JSON.stringify(cloudData.settings || {}) === JSON.stringify(storage.settings || {});
+    const bankMatch = JSON.stringify(cloudData.bankInfo || {}) === JSON.stringify(storage.bankInfo || {});
     lastSyncTime = new Date();
-    if (usersMatch) {
+    if (usersMatch && settingsMatch && bankMatch) {
       setCloudStatus('synced');
-      if (showAlert) alert(`✅ Đã lưu và xác minh trên Drive!\nUsers: ${(cloudData.users||[]).length}\nTháng đã lưu: ${Object.keys(cloudData.history||{}).length}`);
+      if (showAlert) alert(`✅ Đã lưu và XÁC MINH trên Drive!\n\n• Users: ${(cloudData.users||[]).length}\n• Settings: OK\n• Bank: ${cloudData.bankInfo?.accountNo || 'chưa có'}\n• Tháng đã lưu: ${Object.keys(cloudData.history||{}).length}`);
     } else {
       setCloudStatus('error');
-      if (showAlert) alert(`⚠️ Đã POST nhưng server chưa cập nhật.`);
+      const diffs = [];
+      if (!usersMatch) diffs.push(`Users (server ${(cloudData.users||[]).length} ≠ local ${(storage.users||[]).length})`);
+      if (!settingsMatch) diffs.push(`Settings`);
+      if (!bankMatch) diffs.push(`BankInfo`);
+      if (showAlert) alert(`⚠️ POST đã gửi nhưng server chưa cập nhật!\n\nKhác: ${diffs.join(', ')}`);
     }
   } catch (ve) {
     setCloudStatus('synced');
-    if (showAlert) alert("✅ Đã gửi dữ liệu lên Drive!\n\n(Không xác minh được: " + ve.message.split('\n')[0] + ")");
+    if (showAlert) alert("✅ Đã gửi dữ liệu lên Drive!");
   }
 }
 function scheduleCloudSave() {
@@ -965,19 +994,20 @@ async function saveUsersNow() {
 async function testCloudConnection() {
   showLoading("Đang test kết nối...");
   try {
-    const data = await fetchCloud();
+    const res = await fetch(SCRIPT_URL + '?action=test&_=' + Date.now(), { cache: 'no-store' });
+    const data = await res.json();
     hideLoading();
-    if (data && (data.users !== undefined || data.history !== undefined)) {
+    if (data && data.ok) {
       alert([
-        '✅ KẾT NỐI DRIVE OK',
-        '',
-        'Users trên server: ' + (data.users || []).length,
-        'Tháng đã lưu: ' + Object.keys(data.history || {}).length,
-        'Admin password: ' + (data.adminPassword ? 'Có' : 'Không'),
-        'Bank: ' + (data.bankInfo && data.bankInfo.accountNo ? data.bankInfo.accountNo : 'chưa cấu hình')
+        '✅ KẾT NỐI DRIVE OK','',
+        '• Users: ' + data.userCount,
+        '• Tháng đã lưu: ' + data.historyMonths,
+        '• Settings: ' + JSON.stringify(data.settings),
+        '• Bank STK: ' + (data.bankInfo?.accountNo || 'chưa có'),
+        '• Admin pass: ' + (data.hasAdminPass ? 'Có' : 'Không')
       ].join('\n'));
     } else {
-      alert('⚠️ Server trả về nhưng không có data.');
+      alert('⚠️ Server phản hồi: ' + JSON.stringify(data).substring(0, 300));
     }
   } catch (err) {
     hideLoading();
@@ -985,12 +1015,12 @@ async function testCloudConnection() {
   }
 }
 
-/* ========== AUTH ========== */
+/* ============ AUTH ============ */
 async function handleLogin(silent = false) {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value.trim();
   if (!u || !p) {
-    if (!silent) alert("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
+    if (!silent) alert("Vui lòng nhập đầy đủ!");
     return false;
   }
   const btn = document.getElementById('loginBtn');
@@ -1073,7 +1103,7 @@ function setInputsDisabled(d) {
   document.querySelectorAll('#roomsBody input').forEach(el => el.disabled = d);
 }
 function initAppData() {
-  const m = new Date().toISOString().slice(0,7);
+  const m = currentMonthStr();
   const selMonth = document.getElementById('selectedMonth');
   if (selMonth && !selMonth.value) selMonth.value = m;
   if (storage.settings) {
@@ -1088,12 +1118,12 @@ function initAppData() {
     document.getElementById('bankTemplate').value = storage.bankInfo.template || 'compact2';
   }
   setCloudStatus('synced', 'Sẵn sàng');
-  renderTable();
-  calculate();
-  renderHistory();
+  // Load theo logic thông minh
+  onMonthChange();
+  renderRoomsManage();
 }
 
-/* ========== NAV ========== */
+/* ============ NAV ============ */
 function switchAppTab(name) {
   document.querySelectorAll('.app-tab').forEach(el => el.classList.toggle('active', el.dataset.tabContent === name));
   document.querySelectorAll('.nav-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === name));
@@ -1106,7 +1136,7 @@ function switchSettingsTab(name, btn) {
   document.getElementById('subtab-' + name).classList.add('active');
 }
 
-/* ========== HELPERS ========== */
+/* ============ HELPERS ============ */
 function showLoading(t) {
   const el = document.getElementById('loadingIndicator');
   el.innerText = t; el.classList.add('show');
@@ -1121,10 +1151,80 @@ function handleInputFormatted(el) {
   el.setSelectionRange(caret, caret);
 }
 
-/* ========== STATUS ========== */
+/* ============================================================
+   LOGIC CHỌN THÁNG THÔNG MINH
+   ============================================================ */
+function onMonthChange() {
+  const month = document.getElementById('selectedMonth').value;
+  if (!month) return;
+
+  // CASE 1: Đã có data → load từ history
+  if (storage.history[month]) {
+    loadDataFromMonth(month);
+    updateMonthStatus(month);
+    return;
+  }
+
+  // CASE 2: Chưa có data → tạo mới dựa trên tháng liền trước
+  const prevStr = prevMonthStr(month);
+  const prevData = storage.history[prevStr];
+
+  if (prevData) {
+    // Copy số mới tháng trước làm số cũ tháng này, số mới = 0 cho admin nhập
+    currentRooms = prevData.rooms.map(pr => ({
+      name: pr.name,
+      oldElec: pr.newElec || 0,
+      newElec: 0,
+      oldWater: pr.newWater || 0,
+      newWater: 0,
+      paymentStatus: 'unpaid'
+    }));
+    document.getElementById('totalElecCost').value = '';
+    document.getElementById('totalWaterCost').value = '';
+    document.getElementById('internetCost').value = prevData.internetCost || '70.000';
+  } else {
+    // Không có gì → reset hoàn toàn về default với số 0
+    currentRooms = JSON.parse(JSON.stringify(defaultRooms));
+    currentRooms.forEach(r => {
+      r.oldElec = 0; r.newElec = 0;
+      r.oldWater = 0; r.newWater = 0;
+      r.paymentStatus = 'unpaid';
+    });
+    document.getElementById('totalElecCost').value = '';
+    document.getElementById('totalWaterCost').value = '';
+    document.getElementById('internetCost').value = '70.000';
+  }
+
+  renderTable();
+  calculate();
+  updateMonthStatus(month);
+}
+
+function updateMonthStatus(month) {
+  const badge = document.getElementById('monthStatusBadge');
+  if (!badge || !month) return;
+  const curM = currentMonthStr();
+  const hasData = !!storage.history[month];
+
+  badge.classList.remove('current','past','future','has');
+
+  if (month > curM) {
+    badge.innerText = 'Tháng tương lai';
+    badge.classList.add('future');
+  } else if (month === curM) {
+    badge.innerText = hasData ? 'Tháng này · Đã nhập' : 'Tháng này · Chưa nhập';
+    badge.classList.add('current');
+    if (hasData) badge.classList.add('has');
+  } else {
+    badge.innerText = hasData ? 'Đã nhập' : 'Chưa nhập';
+    badge.classList.add('past');
+    if (hasData) badge.classList.add('has');
+  }
+}
+
+/* ============ STATUS ============ */
 const STATUS_LABEL = { unpaid:'Chưa', notified:'Báo rồi', paid:'Đã thu' };
 function getStatus(room) { return room.paymentStatus || 'unpaid'; }
-
 function cyclePaymentStatus(roomName) {
   if (currentRole !== 'admin') return;
   const month = document.getElementById('selectedMonth').value;
@@ -1154,16 +1254,16 @@ function cyclePaymentStatus(roomName) {
   scheduleCloudSave();
 }
 
-/* ========== ĐỔI MK ========== */
+/* ============ ĐỔI MK ============ */
 function changeAdminPassword() {
   if (currentRole !== 'admin') return;
   const oldPass = document.getElementById('oldAdminPass').value;
   const newPass = document.getElementById('newAdminPass').value;
   const confirmPass = document.getElementById('confirmAdminPass').value;
-  if (!oldPass || !newPass || !confirmPass) { alert("Vui lòng nhập đầy đủ 3 ô mật khẩu!"); return; }
-  if (oldPass !== (storage.adminPassword || '123456')) { alert("Mật khẩu Admin hiện tại không đúng!"); return; }
+  if (!oldPass || !newPass || !confirmPass) { alert("Vui lòng nhập đầy đủ 3 ô!"); return; }
+  if (oldPass !== (storage.adminPassword || '123456')) { alert("Mật khẩu hiện tại không đúng!"); return; }
   if (newPass.length < 4) { alert("Mật khẩu mới phải có ít nhất 4 ký tự!"); return; }
-  if (newPass !== confirmPass) { alert("Mật khẩu xác nhận không khớp!"); return; }
+  if (newPass !== confirmPass) { alert("Xác nhận không khớp!"); return; }
   storage.adminPassword = newPass;
   localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
   document.getElementById('oldAdminPass').value = '';
@@ -1173,10 +1273,10 @@ function changeAdminPassword() {
   if (r && r.username === 'admin') saveRememberedLogin('admin', newPass);
   updateSettingsFooter('Đang đồng bộ mật khẩu mới...');
   scheduleCloudSave();
-  alert("Đã đổi mật khẩu Admin! Đang đồng bộ lên Drive.");
+  alert("Đã đổi mật khẩu Admin!");
 }
 
-/* ========== USERS ========== */
+/* ============ USERS ============ */
 function renderUsers() {
   const tbody = document.getElementById('usersBody');
   if (!tbody) return;
@@ -1199,7 +1299,7 @@ function updateUser(idx, field, val) {
   if (!storage.users[idx]) return;
   if (field === 'username') {
     const v = (val || '').trim();
-    if (v === 'admin') { alert("Không thể đặt username là 'admin'!"); renderUsers(); return; }
+    if (v === 'admin') { alert("Không thể đặt là 'admin'!"); renderUsers(); return; }
     storage.users[idx][field] = v;
   } else storage.users[idx][field] = val;
   localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
@@ -1226,7 +1326,7 @@ function removeUser(idx) {
   scheduleCloudSave();
 }
 
-/* ========== TABLE ========== */
+/* ============ TABLE ============ */
 function renderTable() {
   const tbody = document.getElementById('roomsBody');
   tbody.innerHTML = '';
@@ -1252,6 +1352,7 @@ function renderTable() {
       </button></td>`;
     tbody.appendChild(tr);
   });
+  renderRoomsManage();
 }
 function updateRoom(idx, field, val) {
   if (currentRole !== 'admin') return;
@@ -1262,9 +1363,12 @@ function updateRoom(idx, field, val) {
 }
 function addRoom() {
   if (currentRole !== 'admin') return;
-  currentRooms.push({ name:`Phòng ${currentRooms.length+1}`, oldElec:0, newElec:0, oldWater:0, newWater:0, paymentStatus:'unpaid' });
+  const nextNum = currentRooms.length + 1;
+  currentRooms.push({ name:`Phòng ${nextNum}`, oldElec:0, newElec:0, oldWater:0, newWater:0, paymentStatus:'unpaid' });
   renderTable();
   calculate();
+  renderRoomsManage();
+  alert(`Đã thêm "Phòng ${nextNum}". Vào trang chủ để nhập chỉ số.`);
 }
 function removeRoom(idx) {
   if (currentRole !== 'admin') return;
@@ -1272,10 +1376,34 @@ function removeRoom(idx) {
     currentRooms.splice(idx, 1);
     renderTable();
     calculate();
+    renderRoomsManage();
   }
 }
 
-/* ========== CALCULATE ========== */
+/* Render danh sách phòng trong tab Cài đặt */
+function renderRoomsManage() {
+  const tbody = document.getElementById('roomsManageBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (currentRooms.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text2);padding:20px">Chưa có phòng nào</td></tr>';
+    return;
+  }
+  currentRooms.forEach((r, idx) => {
+    const status = getStatus(r);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${r.name}</strong></td>
+      <td>${formatNumber(r.oldElec || 0)} / ${formatNumber(r.oldWater || 0)}</td>
+      <td><span class="status-badge ${status}" style="cursor:default">${STATUS_LABEL[status]}</span></td>
+      <td><button class="fb-btn fb-btn-danger fb-btn-sm" onclick="removeRoom(${idx})">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ============ CALCULATE ============ */
 function applyRoundingRule(val, rule) {
   if (rule === 'ceil1000') return Math.ceil(val/1000)*1000;
   if (rule === 'ceil500') return Math.ceil(val/500)*500;
@@ -1327,16 +1455,14 @@ function calculate() {
   document.getElementById('valGrandTotal').innerText = `${formatNumber(grandTotal)} đ`;
 }
 
-/* ========== ROLLOVER ========== */
+/* ============ ROLLOVER ============ */
 function rollOverPreviousMonth() {
   if (currentRole !== 'admin') return;
   const month = document.getElementById('selectedMonth').value;
   if (!month) return;
-  const [y,m] = month.split('-').map(Number);
-  const prev = new Date(y, m-2, 1);
-  const prevStr = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+  const prevStr = prevMonthStr(month);
   if (!storage.history[prevStr]) {
-    alert(`Không tìm thấy dữ liệu đã lưu của tháng trước (${formatMonthLong(prevStr)}).`);
+    alert(`Không tìm thấy dữ liệu đã lưu của ${formatMonthLong(prevStr)}.`);
     return;
   }
   const prevData = storage.history[prevStr];
@@ -1350,7 +1476,7 @@ function rollOverPreviousMonth() {
   alert(`Đã nạp số cuối ${formatMonthLong(prevStr)} làm số cũ cho ${formatMonthLong(month)}.`);
 }
 
-/* ========== SAVE MONTH ========== */
+/* ============ SAVE MONTH ============ */
 async function saveMonthData() {
   if (currentRole !== 'admin') return;
   calculate();
@@ -1385,6 +1511,7 @@ async function saveMonthData() {
   };
   localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
   renderHistory();
+  updateMonthStatus(month);
 
   showLoading("Đang ghi lên Drive...");
   await postViaIframe(storage);
@@ -1404,11 +1531,11 @@ async function saveMonthData() {
   } catch (ve) {
     hideLoading();
     setCloudStatus('synced');
-    alert(`Đã gửi ${formatMonthLong(month)} lên Drive!\n(Không xác minh: ${ve.message.split('\n')[0]})`);
+    alert(`Đã gửi ${formatMonthLong(month)} lên Drive!`);
   }
 }
 
-/* ========== SYNC ========== */
+/* ============ SYNC ============ */
 async function syncFromCloud(silent = false) {
   if (!silent) showLoading("Đang nạp từ Drive...");
   else setCloudStatus('syncing');
@@ -1436,8 +1563,12 @@ async function syncFromCloud(silent = false) {
       if (currentRole === 'admin') {
         renderUsers(); renderHistory();
         const curMonth = document.getElementById('selectedMonth').value;
-        if (storage.history[curMonth]) loadDataFromMonth(curMonth);
-        else { renderTable(); calculate(); }
+        // Reload theo logic thông minh
+        if (curMonth) {
+          if (storage.history[curMonth]) loadDataFromMonth(curMonth);
+          else onMonthChange();
+        }
+        updateMonthStatus(curMonth);
       } else if (currentRole === 'user') {
         renderUserBill();
       }
@@ -1455,10 +1586,6 @@ async function syncFromCloud(silent = false) {
   }
 }
 
-function onMonthChange() {
-  const month = document.getElementById('selectedMonth').value;
-  if (storage.history[month]) loadDataFromMonth(month);
-}
 function loadDataFromMonth(month) {
   const data = storage.history[month];
   if (!data) return;
@@ -1469,7 +1596,7 @@ function loadDataFromMonth(month) {
   currentRooms = JSON.parse(JSON.stringify(data.rooms));
   renderTable();
   calculate();
-  switchAppTab('home');
+  updateMonthStatus(month);
 }
 async function deleteHistory(month) {
   if (currentRole !== 'admin') return;
@@ -1477,13 +1604,14 @@ async function deleteHistory(month) {
     delete storage.history[month];
     localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
     renderHistory();
+    // Reload theo tháng hiện tại đang chọn
+    const curMonth = document.getElementById('selectedMonth').value;
+    if (curMonth === month) onMonthChange();
     await saveAllToCloud(false);
   }
 }
 
-/* ============================================================
-   LỊCH SỬ — ACCORDION TỪNG THÁNG VỚI CHI TIẾT TỪNG PHÒNG
-   ============================================================ */
+/* ============ HISTORY ============ */
 function renderHistory() {
   const container = document.getElementById('historyBody');
   if (!container) return;
@@ -1493,9 +1621,7 @@ function renderHistory() {
   if (months.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">
-          <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
+        <div class="empty-icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="empty-title">Chưa có dữ liệu</div>
         <div class="empty-sub">Bấm "Lưu lên Drive" ở trang chủ để lưu tháng đầu tiên.</div>
       </div>`;
@@ -1508,7 +1634,6 @@ function renderHistory() {
     const unitW = parsePrice(item.unitPriceWater);
     const internet = parseNumber(item.internetCost || 0);
 
-    // Build rows chi tiết từng phòng
     let roomRows = '';
     (item.rooms || []).forEach(r => {
       const eUsed = r.elecUsed !== undefined ? r.elecUsed : Math.max(0, (r.newElec||0) - (r.oldElec||0));
@@ -1536,10 +1661,10 @@ function renderHistory() {
 
     const adminActions = currentRole === 'admin' ? `
       <div class="month-actions" onclick="event.stopPropagation()">
-        <button class="fb-btn fb-btn-sm" onclick="loadDataFromMonth('${m}')" title="Sửa tháng này">
+        <button class="fb-btn fb-btn-sm" onclick="loadDataFromMonth('${m}');switchAppTab('home')" title="Sửa">
           <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <button class="fb-btn fb-btn-sm fb-btn-danger" onclick="deleteHistory('${m}')" title="Xóa tháng này">
+        <button class="fb-btn fb-btn-sm fb-btn-danger" onclick="deleteHistory('${m}')" title="Xóa">
           <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
       </div>` : '';
@@ -1549,9 +1674,7 @@ function renderHistory() {
     card.innerHTML = `
       <div class="month-header ${i === 0 ? 'open' : ''}" onclick="toggleMonthCard('${m}', this)">
         <div class="month-header-left">
-          <div class="month-chev">
-            <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
+          <div class="month-chev"><svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
           <div style="min-width:0;flex:1">
             <div class="month-name">${formatMonthLong(m)}</div>
             <div class="month-summary">
@@ -1607,7 +1730,7 @@ function toggleMonthCard(month, headerEl) {
   headerEl.classList.toggle('open', isOpen);
 }
 
-/* ========== EXPORT ZALO ========== */
+/* ============ EXPORT ZALO ============ */
 function exportZaloBills() {
   calculate();
   const month = document.getElementById('selectedMonth').value;
@@ -1641,7 +1764,7 @@ TỔNG PHẢI ĐÓNG: ${finalCost}
   document.getElementById('zaloPreviewCard').scrollIntoView({ behavior:'smooth' });
 }
 
-/* ========== USER BILL ========== */
+/* ============ USER BILL ============ */
 function renderUserBill() {
   const content = document.getElementById('userBillContent');
   if (!content) return;
@@ -1785,7 +1908,7 @@ function renderUserBill() {
     </div>`;
 }
 
-/* ========== NOTIFY ========== */
+/* ============ NOTIFY ============ */
 async function notifyPayment() {
   if (currentRole !== 'user') return;
   const user = (storage.users || []).find(x => x.username === currentUsername);
@@ -1797,11 +1920,11 @@ async function notifyPayment() {
   const room = data.rooms.find(r => r.name === user.roomName);
   if (!room) return;
   const cur = getStatus(room);
-  if (cur === 'paid') { alert('Hóa đơn này chủ nhà đã xác nhận thanh toán.'); return; }
+  if (cur === 'paid') { alert('Hóa đơn này đã được xác nhận.'); return; }
   if (cur === 'notified') {
     if (!confirm('Bạn đã báo chuyển khoản trước đó. Báo lại?')) return;
   } else {
-    if (!confirm('Xác nhận bạn đã chuyển khoản đủ số tiền cho chủ nhà?')) return;
+    if (!confirm('Xác nhận bạn đã chuyển khoản đủ số tiền?')) return;
   }
   try {
     const cloudData = await fetchCloud();
@@ -1821,7 +1944,7 @@ async function notifyPayment() {
       alert('✅ Đã báo chủ nhà.');
       return;
     }
-  } catch (e) { console.warn('Sync latest failed:', e.message); }
+  } catch (e) { console.warn('Sync failed:', e.message); }
   room.paymentStatus = 'notified';
   room.notifiedAt = new Date().toISOString();
   localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
@@ -1833,7 +1956,7 @@ async function notifyPayment() {
   alert('✅ Đã báo chủ nhà.');
 }
 
-/* ========== BOOT ========== */
+/* ============ BOOT ============ */
 (function boot() {
   const role = sessionStorage.getItem('current_role');
   const user = sessionStorage.getItem('current_user');
