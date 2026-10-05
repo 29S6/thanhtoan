@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Quản Lý Điện Nước</title>
+<style>
+  :root{
+    --blue:#0866ff;--blue-h:#0757d9;--blue-l:#e7f3ff;
+    --bg:#f0f2f5;--card:#fff;--text:#050505;--text2:#65676b;--text3:#8a8d91;
+    --div:#ced0d4;--div-s:#e4e6eb;--hover:rgba(0,0,0,.05);
+    --in-bg:#f0f2f5;--sh:0 1px 2px rgba(0,0,0,.1);
+    --sh-lg:0 12px 28px rgba(0,0,0,.15),0 2px 4px rgba(0,0,0,.1);
+    --green:#31a24c;--green-l:#e3f7e8;--red:#e41e3f;--red-l:#fee7eb;
+    --yellow:#b06c00;--yellow-l:#fff4e0;
+    --r:8px;--r-lg:12px;--r-p:999px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --blue:#2d88ff;--blue-h:#4e9aff;--blue-l:#1d3a5f;
+      --bg:#18191a;--card:#242526;--text:#e4e6eb;--text2:#b0b3b8;--text3:#7c7f83;
+      --div:#3e4042;--div-s:#2e3031;--hover:rgba(255,255,255,.1);
+      --in-bg:#3a3b3c;--sh:0 1px 2px rgba(0,0,0,.3);
+      --sh-lg:0 12px 28px rgba(0,0,0,.6),0 2px 4px rgba(0,0,0,.4);
+      --green-l:#1a3a24;--red-l:#3a1a1e;--yellow-l:#4a3a1a;--yellow:#f7b928;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;
+    -webkit-font-smoothing:antialiased;min-height:100vh}
+  button{font-family:inherit;cursor:pointer}
+  input,select{font-family:inherit}
+  a{color:var(--blue);text-decoration:none}
+  .svg-icon{display:inline-block;flex-shrink:0;width:20px;height:20px;fill:none;
+    stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+  .svg-icon-sm{width:16px;height:16px;stroke-width:2.2}
+
+  #loadingIndicator{display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--r-p);
+    font-size:13px;font-weight:600;z-index:9999;box-shadow:var(--sh-lg);
+    align-items:center;gap:8px}
+  #loadingIndicator.show{display:flex}
+  #loadingIndicator::before{content:'';width:14px;height:14px;border:2px solid var(--bg);
+    border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (min-width:768px){#loadingIndicator{bottom:30px}}
+
+  #lockScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;
+    justify-content:center;padding:20px;z-index:9999;overflow-y:auto}
+  .login-card{background:var(--card);border-radius:var(--r-lg);padding:36px 28px 28px;
+    width:100%;max-width:400px;box-shadow:var(--sh-lg);text-align:center}
+  .login-logo{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;
+    border-radius:50%;background:var(--blue);color:#fff;margin-bottom:16px;
+    box-shadow:0 4px 12px rgba(8,102,255,.35)}
+  .login-logo .svg-icon{width:34px;height:34px;stroke-width:2.2}
+  .login-title{font-size:24px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+  .login-sub{font-size:14px;color:var(--text2);margin-bottom:28px}
+  .input-wrap{position:relative;margin-bottom:10px}
+  .input-wrap .input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    color:var(--text3);pointer-events:none}
+  .login-input{width:100%;padding:14px 16px 14px 44px;border-radius:var(--r);
+    border:1px solid var(--div);background:var(--in-bg);color:var(--text);font-size:15px;outline:none;transition:.15s}
+  .login-input::placeholder{color:var(--text3)}
+  .login-input:focus{border-color:var(--blue);background:var(--card)}
+  .remember-label{display:flex;align-items:center;gap:8px;padding:8px 2px 16px;
+    cursor:pointer;font-size:14px;color:var(--text2);user-select:none}
+  .remember-label input[type="checkbox"]{width:18px;height:18px;accent-color:var(--blue);margin:0}
+  .login-btn{width:100%;padding:14px;border-radius:var(--r);font-size:16px;font-weight:700;
+    background:var(--blue);color:#fff;border:none;transition:.15s;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px}
+  .login-btn:hover{background:var(--blue-h)}
+  .login-btn:active{transform:scale(.98)}
+  .login-btn:disabled{opacity:.6;cursor:not-allowed}
+  .login-hint{margin-top:22px;font-size:13px;color:var(--text3)}
+
+  .app-header{position:sticky;top:0;height:56px;background:var(--card);
+    border-bottom:1px solid var(--div-s);display:flex;align-items:center;
+    justify-content:space-between;padding:0 14px;z-index:100;box-shadow:var(--sh)}
+  .header-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+  .header-logo{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;
+    border-radius:50%;background:var(--blue);color:#fff;flex-shrink:0}
+  .header-logo .svg-icon{width:20px;height:20px;stroke-width:2.4}
+  .header-title{font-size:17px;font-weight:700;letter-spacing:-.2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .header-icon-btn{width:40px;height:40px;border-radius:50%;background:var(--in-bg);
+    border:none;display:inline-flex;align-items:center;justify-content:center;
+    color:var(--text);transition:.15s}
+  .header-icon-btn:hover{background:var(--div-s)}
+  .header-icon-btn:active{transform:scale(.94)}
+
+  .cloud-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;
+    border-radius:var(--r-p);background:var(--in-bg);font-size:12px;
+    font-weight:500;color:var(--text2);white-space:nowrap}
+  .cloud-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
+  .cloud-badge.synced .dot{background:var(--green)}
+  .cloud-badge.syncing .dot{background:#f7b928;animation:pulse 1s infinite}
+  .cloud-badge.error .dot{background:var(--red)}
+  .cloud-badge .txt{max-width:90px;overflow:hidden;text-overflow:ellipsis}
+  @media (max-width:480px){.cloud-badge .txt{display:none}.cloud-badge{padding:8px}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .app-nav{display:flex;background:var(--card);border-bottom:1px solid var(--div-s);
+    position:sticky;top:56px;z-index:90;padding:0 8px;gap:4px}
+  .nav-tab{flex:1;padding:14px 8px;background:transparent;border:none;font-size:15px;
+    font-weight:600;color:var(--text2);border-bottom:3px solid transparent;
+    display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s;white-space:nowrap}
+  .nav-tab:hover:not(.active){background:var(--hover)}
+  .nav-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+  @media (max-width:767px){
+    .app-nav{position:fixed;top:auto;bottom:0;left:0;right:0;padding:0;
+      padding-bottom:env(safe-area-inset-bottom,0);gap:0;
+      border-top:1px solid var(--div-s);border-bottom:none;
+      box-shadow:0 -1px 2px rgba(0,0,0,.06)}
+    .nav-tab{flex-direction:column;padding:8px 4px 6px;gap:2px;font-size:11px;font-weight:500;
+      border-bottom:none;border-top:3px solid transparent}
+    .nav-tab.active{border-top-color:var(--blue);border-bottom-color:transparent}
+  }
+
+  .app-main{max-width:1180px;margin:0 auto;padding:12px;padding-bottom:90px}
+  @media (min-width:768px){.app-main{padding:24px 24px 60px}}
+  .app-tab{display:none}
+  .app-tab.active{display:block}
+
+  .fb-card,.fb-panel{background:var(--card);border-radius:var(--r-lg);
+    box-shadow:var(--sh);margin-bottom:14px;overflow:hidden}
+  .fb-card-header,.fb-panel-head{padding:16px 20px;display:flex;justify-content:space-between;
+    align-items:center;gap:12px;flex-wrap:wrap}
+  .fb-card-title,.fb-panel-head h3{font-size:17px;font-weight:700;color:var(--text);
+    letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+  .fb-card-title .svg-icon,.fb-panel-head h3 .svg-icon{color:var(--blue)}
+  .fb-card-body{padding:0 20px 20px}
+  .fb-card-body.full-pad{padding:20px}
+  .fb-panel-body{padding:0 20px 20px}
+  .fb-panel-body.flush{padding:0}
+
+  .fb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .fb-field{display:flex;flex-direction:column;gap:6px}
+  .fb-label{font-size:12.5px;font-weight:600;color:var(--text2);
+    text-transform:uppercase;letter-spacing:.3px}
+  .fb-input,.fb-select{width:100%;padding:12px 14px;border-radius:var(--r);
+    border:1px solid var(--div);background:var(--in-bg);color:var(--text);
+    font-size:15px;outline:none;transition:.15s}
+  .fb-input::placeholder{color:var(--text3)}
+  .fb-input:focus,.fb-select:focus{border-color:var(--blue);background:var(--card);
+    box-shadow:0 0 0 2px rgba(8,102,255,.15)}
+  .fb-input:disabled,.fb-select:disabled{opacity:.6;cursor:not-allowed}
+
+  .fb-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    padding:10px 18px;border-radius:var(--r);border:none;font-size:14.5px;
+    font-weight:600;background:var(--in-bg);color:var(--text);transition:.15s;white-space:nowrap}
+  .fb-btn:hover{background:var(--div-s)}
+  .fb-btn:active{transform:scale(.97)}
+  .fb-btn-primary{background:var(--blue);color:#fff}
+  .fb-btn-primary:hover{background:var(--blue-h)}
+  .fb-btn-success{background:var(--green);color:#fff}
+  .fb-btn-success:hover{filter:brightness(.94)}
+  .fb-btn-danger{background:transparent;color:var(--red)}
+  .fb-btn-danger:hover{background:var(--red-l)}
+  .fb-btn-block{width:100%;padding:14px;font-size:15px}
+  .fb-btn-sm{padding:7px 13px;font-size:13px}
+  .fb-btn-sm .svg-icon{width:14px;height:14px}
+
+  .fb-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--div-s);
+    -webkit-overflow-scrolling:touch}
+  table.fb-table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--card)}
+  table.fb-table th,table.fb-table td{padding:12px 14px;text-align:center;
+    border-bottom:1px solid var(--div-s);vertical-align:middle;white-space:nowrap}
+  table.fb-table thead th{background:var(--in-bg);color:var(--text2);font-weight:700;
+    font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0}
+  table.fb-table tbody tr:last-child td{border-bottom:none}
+  table.fb-table tbody tr:hover{background:var(--hover)}
+  table.fb-table input{width:100%;min-width:76px;padding:8px 10px;border:1px solid transparent;
+    border-radius:6px;background:transparent;color:var(--text);font-size:14.5px;
+    font-weight:600;text-align:right;outline:none;font-family:inherit;font-variant-numeric:tabular-nums}
+  table.fb-table input.input-name{text-align:center;font-weight:700;min-width:88px}
+  table.fb-table input:hover{border-color:var(--div)}
+  table.fb-table input:focus{border-color:var(--blue);background:var(--card);
+    box-shadow:0 0 0 2px rgba(8,102,255,.15)}
+  table.fb-table td.cell-total{font-weight:800;color:var(--green);font-size:14.5px;
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.fb-table td.cell-raw{color:var(--text2);font-size:13px;
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.fb-table td.cell-used{font-weight:700;font-size:14.5px;
+    font-variant-numeric:tabular-nums;color:var(--text)}
+  table.fb-table td.cell-price{font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px}
+
+  .status-badge{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;
+    border-radius:var(--r-p);font-size:11.5px;font-weight:700;cursor:pointer;
+    border:none;white-space:nowrap;transition:.15s}
+  .status-badge.unpaid{background:#f0f2f5;color:#65676b}
+  .status-badge.notified{background:var(--yellow-l);color:var(--yellow)}
+  .status-badge.paid{background:var(--green-l);color:var(--green)}
+  @media (prefers-color-scheme:dark){.status-badge.unpaid{background:#3a3b3c;color:#b0b3b8}}
+  .status-badge:hover{filter:brightness(.95);transform:scale(1.03)}
+
+  .fb-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px;margin-top:16px}
+  .fb-stat{background:var(--in-bg);border-radius:var(--r);padding:14px;text-align:center}
+  .fb-stat .label{font-size:11.5px;font-weight:600;color:var(--text2);
+    text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px}
+  .fb-stat .value{font-size:18px;font-weight:700;letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+  .fb-stat.highlight{background:var(--blue)}
+  .fb-stat.highlight .label{color:rgba(255,255,255,.75)}
+  .fb-stat.highlight .value{color:#fff;font-size:22px}
+
+  .fb-note{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;
+    background:var(--blue-l);border-radius:var(--r);margin-bottom:14px;
+    font-size:13.5px;line-height:1.5;color:var(--text)}
+  .fb-note-icon{color:var(--blue);flex-shrink:0}
+  .fb-note-close{margin-left:auto;background:none;border:none;color:var(--text2);
+    font-size:20px;line-height:1;padding:0 4px;flex-shrink:0;cursor:pointer}
+  .fb-note strong{color:var(--blue)}
+
+  .sub-tabs{display:flex;gap:4px;padding:8px;background:var(--in-bg);
+    border-radius:var(--r);margin-bottom:18px;overflow-x:auto;scrollbar-width:none}
+  .sub-tabs::-webkit-scrollbar{display:none}
+  .sub-tab{flex:1;min-width:fit-content;padding:10px 16px;border-radius:6px;
+    background:transparent;border:none;font-size:13.5px;font-weight:600;
+    color:var(--text2);white-space:nowrap;transition:.15s;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .sub-tab.active{background:var(--card);color:var(--blue);box-shadow:var(--sh)}
+  .sub-tab:hover:not(.active){background:rgba(255,255,255,.5)}
+  .sub-tab-content{display:none}
+  .sub-tab-content.active{display:block}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;
+    display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px)}
+  .modal-backdrop.show{display:flex}
+  .modal-box{background:var(--card);border-radius:var(--r-lg);width:100%;
+    max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:var(--sh-lg)}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;
+    padding:16px 20px;border-bottom:1px solid var(--div-s);flex-shrink:0}
+  .modal-header h3{font-size:17px;font-weight:700;letter-spacing:-.2px}
+  .modal-close{width:36px;height:36px;border-radius:50%;background:var(--in-bg);
+    border:none;color:var(--text);display:inline-flex;align-items:center;
+    justify-content:center;transition:.15s}
+  .modal-close:hover{background:var(--div-s)}
+  .modal-scroll{padding:20px;overflow-y:auto;flex:1}
+  .modal-footer{padding:16px 20px;border-top:1px solid var(--div-s);
+    display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;background:var(--card);flex-shrink:0}
+
+  .bill-hero{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--sh);
+    padding:28px 24px;text-align:center;margin-bottom:14px}
+  .bill-hero-avatar{display:inline-flex;align-items:center;justify-content:center;
+    width:88px;height:88px;border-radius:50%;background:var(--blue);color:#fff;
+    margin-bottom:12px;box-shadow:0 6px 18px rgba(8,102,255,.3)}
+  .bill-hero-avatar .svg-icon{width:44px;height:44px;stroke-width:1.8}
+  .bill-hero-name{font-size:24px;font-weight:700;letter-spacing:-.3px}
+  .bill-hero-sub{font-size:14.5px;color:var(--text2);margin-top:6px}
+
+  .bill-line{display:flex;justify-content:space-between;align-items:center;
+    padding:16px 0;border-bottom:1px solid var(--div-s);gap:12px;flex-wrap:wrap}
+  .bill-line:last-child{border-bottom:none}
+  .bill-line-left{flex:1;min-width:180px;display:flex;align-items:center;gap:14px}
+  .bill-line-icon{width:48px;height:48px;border-radius:50%;background:var(--blue-l);
+    display:inline-flex;align-items:center;justify-content:center;color:var(--blue);flex-shrink:0}
+  .bill-line-name{font-weight:700;font-size:15.5px}
+  .bill-line-detail{font-size:13px;color:var(--text2);margin-top:3px;font-variant-numeric:tabular-nums}
+  .bill-line-amount{font-weight:800;font-size:18px;white-space:nowrap;
+    letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+
+  .bill-total{background:var(--blue);color:#fff;border-radius:var(--r);
+    padding:20px 22px;margin-top:18px;display:flex;justify-content:space-between;
+    align-items:center;flex-wrap:wrap;gap:8px}
+  .bill-total-label{font-size:13px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.5px;opacity:.9}
+  .bill-total-value{font-size:28px;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+
+  .qr-container{padding:20px;text-align:center}
+  .qr-container img{max-width:300px;width:100%;border-radius:var(--r);
+    background:#fff;padding:10px;border:1px solid var(--div-s);box-shadow:var(--sh)}
+  .qr-bank{margin-top:14px;font-weight:700;font-size:15px}
+  .qr-sub{margin-top:6px;font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums}
+  .qr-amount-pill{display:inline-block;margin-top:14px;padding:12px 24px;
+    background:var(--blue);color:#fff;border-radius:var(--r-p);font-weight:800;font-size:18px;
+    letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+
+  .pay-banner{display:flex;align-items:center;gap:14px;padding:16px 20px;
+    border-radius:var(--r-lg);margin-bottom:14px;box-shadow:var(--sh)}
+  .pay-banner.unpaid{background:var(--card);color:var(--text)}
+  .pay-banner.notified{background:var(--yellow-l);color:var(--yellow)}
+  .pay-banner.paid{background:var(--green-l);color:var(--green)}
+  .pay-banner-icon{width:44px;height:44px;border-radius:50%;display:inline-flex;
+    align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.5)}
+  @media (prefers-color-scheme:dark){
+    .pay-banner.unpaid .pay-banner-icon{background:var(--in-bg)}
+    .pay-banner.notified .pay-banner-icon,
+    .pay-banner.paid .pay-banner-icon{background:rgba(0,0,0,.2)}
+  }
+  .pay-banner-text{flex:1;font-weight:600;font-size:14.5px;line-height:1.4}
+  .pay-banner-text small{display:block;font-weight:400;font-size:12.5px;margin-top:2px;opacity:.85}
+
+  .bill-pc-layout{display:block}
+  @media (min-width:900px){
+    .bill-pc-layout{display:grid;grid-template-columns:1fr 400px;gap:16px;align-items:start}
+  }
+
+  /* ============ MONTH CARD (LỊCH SỬ) ============ */
+  .month-card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--sh);
+    margin-bottom:12px;overflow:hidden}
+  .month-header{display:flex;justify-content:space-between;align-items:center;
+    padding:16px 20px;cursor:pointer;gap:12px;transition:background .15s;flex-wrap:wrap}
+  .month-header:hover{background:var(--hover)}
+  .month-header-left{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+  .month-chev{width:36px;height:36px;display:inline-flex;align-items:center;
+    justify-content:center;border-radius:50%;background:var(--in-bg);
+    color:var(--text2);flex-shrink:0;transition:transform .25s,background .15s,color .15s}
+  .month-chev .svg-icon{width:16px;height:16px}
+  .month-header.open .month-chev{transform:rotate(90deg);background:var(--blue);color:#fff}
+  .month-name{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+  .month-summary{font-size:12.5px;color:var(--text2);margin-top:4px;line-height:1.5}
+  .month-summary strong{color:var(--text);font-weight:700}
+  .month-header-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .month-total{font-size:17px;font-weight:800;color:var(--green);
+    letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+  .month-actions{display:flex;gap:6px}
+  .month-detail{display:none;border-top:1px solid var(--div-s);padding:14px;background:var(--in-bg)}
+  .month-detail.open{display:block}
+  .month-detail .fb-table-wrap{background:var(--card);border-radius:var(--r)}
+  .month-detail-info{margin-top:12px;padding:12px 14px;background:var(--card);
+    border-radius:var(--r);font-size:13px;color:var(--text2);line-height:1.6}
+  .month-detail-info strong{color:var(--text)}
+  @media (max-width:640px){
+    .month-header{padding:14px 16px}
+    .month-chev{width:32px;height:32px}
+    .month-name{font-size:15px}
+    .month-total{font-size:15px}
+    .month-detail{padding:10px}
+  }
+
+  .zalo-item{background:var(--in-bg);border-radius:var(--r);padding:16px;margin-bottom:12px}
+  .zalo-item pre{white-space:pre-wrap;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:12.5px;line-height:1.6;color:var(--text);margin-bottom:10px}
+
+  .empty-state{text-align:center;padding:50px 24px;color:var(--text2)}
+  .empty-icon{color:var(--text3);opacity:.4;margin-bottom:12px;
+    display:inline-flex;align-items:center;justify-content:center}
+  .empty-icon .svg-icon{width:56px;height:56px;stroke-width:1.4}
+  .empty-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:-.2px}
+  .empty-sub{font-size:14px;color:var(--text2);line-height:1.5}
+
+  .mt-12{margin-top:12px}
+  .text-muted{color:var(--text2);font-size:13px;line-height:1.5}
+  .dot-sep{display:inline-block;width:4px;height:4px;border-radius:50%;
+    background:var(--text3);margin:0 6px;vertical-align:middle}
+  .hidden{display:none!important}
+
+  @media (max-width:640px){
+    table.fb-table th,table.fb-table td{padding:10px 8px;font-size:12.5px}
+    table.fb-table input{padding:7px 6px;font-size:13.5px;min-width:62px}
+    table.fb-table input.input-name{min-width:72px}
+    table.fb-table td.cell-total{font-size:13.5px}
+    table.fb-table td.cell-raw{font-size:12px}
+    table.fb-table td.cell-used{font-size:13.5px}
+    table.fb-table thead th{font-size:10.5px;padding:10px 6px}
+  }
+</style>
+</head>
+<body>
+
+<div id="loadingIndicator">Đang xử lý...</div>
+
+<!-- LOGIN -->
+<div id="lockScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="login-title">Điện Nước</div>
+    <div class="login-sub">Quản lý hóa đơn phòng trọ</div>
+    <div class="input-wrap">
+      <span class="input-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <input type="text" id="loginUser" class="login-input" placeholder="Tên đăng nhập" autocomplete="username" autocapitalize="off">
+    </div>
+    <div class="input-wrap">
+      <span class="input-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+      <input type="password" id="loginPass" class="login-input" placeholder="Mật khẩu" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleLogin()">
+    </div>
+    <label class="remember-label">
+      <input type="checkbox" id="rememberMe"><span>Nhớ đăng nhập trên thiết bị này</span>
+    </label>
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">
+      <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Đăng nhập
+    </button>
+    <div class="login-hint">Liên hệ chủ nhà để được cấp tài khoản</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="mainApp" style="display:none">
+  <header class="app-header">
+    <div class="header-left">
+      <div class="header-logo"><svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div class="header-title">Điện Nước</div>
+    </div>
+    <div class="header-right">
+      <span class="cloud-badge" id="cloudStatusAdmin"><span class="dot"></span><span class="txt">Chưa lưu</span></span>
+      <button class="header-icon-btn" onclick="syncFromCloud()" title="Tải lại">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+      <button class="header-icon-btn" onclick="handleLogout()" title="Đăng xuất">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="app-nav">
+    <button class="nav-tab active" data-tab="home" onclick="switchAppTab('home')">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Trang chủ</span>
+    </button>
+    <button class="nav-tab" data-tab="history" onclick="switchAppTab('history')">
+      <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Lịch sử</span>
+    </button>
+    <button class="nav-tab" data-tab="settings" onclick="switchAppTab('settings')">
+      <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Cài đặt</span>
+    </button>
+  </nav>
+
+  <main class="app-main">
+    <section class="app-tab active" data-tab-content="home">
+      <div class="fb-note" id="homeNote">
+        <span class="fb-note-icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+        <div style="flex:1"><strong>Thu tiền tháng 9 →</strong> chọn <strong>2026-09</strong> ở ô chọn tháng. Cột <strong>TT</strong> để đánh dấu phòng đã nộp.</div>
+        <button class="fb-note-close" onclick="document.getElementById('homeNote').style.display='none'">×</button>
+      </div>
+
+      <div class="fb-panel">
+        <div class="fb-panel-head">
+          <h3><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Hóa đơn tổng</h3>
+          <input type="month" id="selectedMonth" class="fb-input" onchange="onMonthChange()" style="width:auto;padding:9px 14px">
+        </div>
+        <div class="fb-panel-body">
+          <div class="fb-grid">
+            <div class="fb-field"><label class="fb-label">Tổng tiền điện (VNĐ)</label>
+              <input type="text" id="totalElecCost" class="fb-input" placeholder="0" oninput="handleInputFormatted(this);calculate()"></div>
+            <div class="fb-field"><label class="fb-label">Tổng tiền nước (VNĐ)</label>
+              <input type="text" id="totalWaterCost" class="fb-input" placeholder="0" oninput="handleInputFormatted(this);calculate()"></div>
+            <div class="fb-field"><label class="fb-label">Internet / phòng (VNĐ)</label>
+              <input type="text" id="internetCost" class="fb-input" value="70.000" oninput="handleInputFormatted(this);calculate()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fb-panel">
+        <div class="fb-panel-head">
+          <h3><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Chỉ số tiêu thụ</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="fb-btn admin-only fb-btn-sm" onclick="rollOverPreviousMonth()">
+              <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Lấy số T.trước
+            </button>
+            <button class="fb-btn fb-btn-primary admin-only fb-btn-sm" onclick="addRoom()">
+              <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Thêm phòng
+            </button>
+          </div>
+        </div>
+        <div class="fb-panel-body flush">
+          <div class="fb-table-wrap" style="margin:0 14px">
+            <table class="fb-table">
+              <thead>
+                <tr>
+                  <th rowspan="2">Phòng</th>
+                  <th colspan="3">Điện (kWh)</th>
+                  <th colspan="3">Nước (m³)</th>
+                  <th rowspan="2">Gốc</th>
+                  <th rowspan="2">Phải đóng</th>
+                  <th rowspan="2">TT</th>
+                  <th rowspan="2" class="admin-only">Xóa</th>
+                </tr>
+                <tr><th>Cũ</th><th>Mới</th><th>Dùng</th><th>Cũ</th><th>Mới</th><th>Dùng</th></tr>
+              </thead>
+              <tbody id="roomsBody"></tbody>
+            </table>
+          </div>
+          <p class="text-muted" style="margin:10px 14px 0">
+            Cột <strong>TT</strong>: <span class="status-badge unpaid" style="cursor:default">Chưa</span>
+            <span class="status-badge notified" style="cursor:default">Báo rồi</span>
+            <span class="status-badge paid" style="cursor:default">Đã thu</span>
+            — bấm để đổi.
+          </p>
+        </div>
+      </div>
+
+      <div class="fb-panel">
+        <div class="fb-panel-body full-pad">
+          <div class="fb-stats">
+            <div class="fb-stat"><div class="label">Tổng điện</div><div class="value" id="valTotalElecUsed">0 số</div></div>
+            <div class="fb-stat"><div class="label">Đơn giá điện</div><div class="value" id="valUnitPriceElec">0 đ</div></div>
+            <div class="fb-stat"><div class="label">Tổng nước</div><div class="value" id="valTotalWaterUsed">0 khối</div></div>
+            <div class="fb-stat"><div class="label">Đơn giá nước</div><div class="value" id="valUnitPriceWater">0 đ</div></div>
+            <div class="fb-stat highlight" style="grid-column:1/-1">
+              <div class="label">Tổng thu các phòng</div>
+              <div class="value" id="valGrandTotal">0 đ</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap">
+            <button class="fb-btn fb-btn-success admin-only" onclick="saveMonthData()">
+              <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Lưu lên Drive
+            </button>
+            <button class="fb-btn fb-btn-primary" onclick="exportZaloBills()">
+              <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+              Xuất tin nhắn
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="fb-panel" id="zaloPreviewCard" style="display:none">
+        <div class="fb-panel-head">
+          <h3><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Tin nhắn gửi từng phòng</h3>
+        </div>
+        <div class="fb-panel-body" id="zaloList"></div>
+      </div>
+    </section>
+
+    <!-- HISTORY - accordion từng tháng -->
+    <section class="app-tab" data-tab-content="history">
+      <div class="fb-panel">
+        <div class="fb-panel-head">
+          <h3><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Lịch sử theo tháng</h3>
+        </div>
+        <div class="fb-panel-body" style="padding-top:0">
+          <div id="historyBody"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="app-tab" data-tab-content="settings">
+      <div class="fb-panel">
+        <div class="fb-panel-body full-pad">
+          <div class="sub-tabs">
+            <button class="sub-tab active" onclick="switchSettingsTab('round', this)">Làm tròn</button>
+            <button class="sub-tab" onclick="switchSettingsTab('security', this)">Bảo mật</button>
+            <button class="sub-tab" onclick="switchSettingsTab('users', this)">Users</button>
+            <button class="sub-tab" onclick="switchSettingsTab('bank', this)">Ngân hàng</button>
+          </div>
+
+          <div class="sub-tab-content active" id="subtab-round">
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Làm tròn đơn giá điện</label>
+              <select id="settingRoundElec" class="fb-select" onchange="onSettingChange()">
+                <option value="ceil1000">Lên 1.000đ</option>
+                <option value="ceil500">Lên 500đ</option>
+                <option value="ceil100">Lên 100đ</option>
+                <option value="exact">Không làm tròn</option>
+              </select>
+            </div>
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Làm tròn đơn giá nước</label>
+              <select id="settingRoundWater" class="fb-select" onchange="onSettingChange()">
+                <option value="ceil1000">Lên 1.000đ</option>
+                <option value="ceil500">Lên 500đ</option>
+                <option value="ceil100">Lên 100đ</option>
+                <option value="exact">Không làm tròn</option>
+              </select>
+            </div>
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Làm tròn tổng tiền phòng</label>
+              <select id="settingRoundRoomTotal" class="fb-select" onchange="onSettingChange()">
+                <option value="ceil1000" selected>Lên 1.000đ</option>
+                <option value="round1000">Gần nhất 1.000đ</option>
+                <option value="exact">Không làm tròn</option>
+              </select>
+            </div>
+            <p class="text-muted">Tự động lưu và đồng bộ lên Drive.</p>
+          </div>
+
+          <div class="sub-tab-content" id="subtab-security">
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Mật khẩu Admin hiện tại</label>
+              <input type="password" id="oldAdminPass" class="fb-input" placeholder="Nhập mật khẩu hiện tại">
+            </div>
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Mật khẩu Admin mới</label>
+              <input type="password" id="newAdminPass" class="fb-input" placeholder="Tối thiểu 4 ký tự">
+            </div>
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Xác nhận mật khẩu mới</label>
+              <input type="password" id="confirmAdminPass" class="fb-input" placeholder="Nhập lại mật khẩu mới">
+            </div>
+            <button class="fb-btn fb-btn-primary fb-btn-block" onclick="changeAdminPassword()">
+              <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Đổi mật khẩu Admin
+            </button>
+          </div>
+
+          <div class="sub-tab-content" id="subtab-users">
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+              <button class="fb-btn fb-btn-primary" onclick="addUser()">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Thêm
+              </button>
+              <button class="fb-btn fb-btn-success" onclick="saveUsersNow()">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Lưu ngay lên Drive
+              </button>
+            </div>
+            <div class="fb-table-wrap">
+              <table class="fb-table" style="min-width:600px">
+                <thead>
+                  <tr><th>Tên đăng nhập</th><th>Mật khẩu</th><th>Phòng</th><th>Tên hiển thị</th><th>Xóa</th></tr>
+                </thead>
+                <tbody id="usersBody"></tbody>
+              </table>
+            </div>
+            <p class="text-muted mt-12">Cột <strong>Phòng</strong> phải nhập chính xác (VD: <em>Phòng 1</em>). Sau khi sửa bấm <strong>Lưu ngay lên Drive</strong>.</p>
+          </div>
+
+          <div class="sub-tab-content" id="subtab-bank">
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Ngân hàng</label>
+              <select id="bankId" class="fb-select" onchange="onSettingChange()">
+                <option value="970436">Vietcombank</option>
+                <option value="970407">Techcombank</option>
+                <option value="970422">MB Bank</option>
+                <option value="970415">Vietinbank</option>
+                <option value="970418">BIDV</option>
+                <option value="970405">Agribank</option>
+                <option value="970416">ACB</option>
+                <option value="970403">Sacombank</option>
+                <option value="970432">VPBank</option>
+                <option value="970423">TPBank</option>
+                <option value="970441">VIB</option>
+                <option value="970443">SHB</option>
+                <option value="970431">Eximbank</option>
+                <option value="970426">MSB</option>
+                <option value="970448">OCB</option>
+                <option value="970429">SCB</option>
+                <option value="970437">HDBank</option>
+                <option value="970440">SeABank</option>
+                <option value="970449">LienVietPostBank</option>
+                <option value="970452">KienLongBank</option>
+              </select>
+            </div>
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Số tài khoản</label>
+              <input type="text" id="bankAccountNo" class="fb-input" placeholder="Ví dụ: 1234567890" onchange="onSettingChange()">
+            </div>
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Chủ tài khoản (không dấu, in hoa)</label>
+              <input type="text" id="bankAccountName" class="fb-input" placeholder="Ví dụ: NGUYEN VAN A" onchange="onSettingChange()">
+            </div>
+            <div class="fb-field" style="margin-bottom:16px">
+              <label class="fb-label">Kiểu QR</label>
+              <select id="bankTemplate" class="fb-select" onchange="onSettingChange()">
+                <option value="compact">Compact</option>
+                <option value="compact2" selected>Compact 2</option>
+                <option value="qr_only">Chỉ QR</option>
+                <option value="print">Print</option>
+              </select>
+            </div>
+            <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--div-s)">
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="fb-btn" onclick="testCloudConnection()">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Test kết nối
+                </button>
+                <button class="fb-btn fb-btn-success" onclick="saveAllToCloud(true)">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                  Lưu tất cả lên Drive
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <span class="text-muted" id="settingsFooterInfo">Thay đổi tự động đồng bộ lên Drive.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- USER -->
+<div id="userBillView" style="display:none">
+  <header class="app-header">
+    <div class="header-left">
+      <div class="header-logo"><svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div class="header-title">Hóa đơn của tôi</div>
+    </div>
+    <div class="header-right">
+      <span class="cloud-badge" id="cloudStatusUser"><span class="dot"></span><span class="txt">Sẵn sàng</span></span>
+      <button class="header-icon-btn" onclick="handleLogout()" title="Đăng xuất">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="app-main">
+    <div id="userBillContent"></div>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — URL MỚI CỦA BẠN
+   ============================================================ */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoHB1FnaoAQ3z6pTUUP1qZsdczasVikyxKtS9syRq44-dqmVqVtk95-xupC_FPU9iy/exec";
+
+const BANKS = {
+  '970436':'Vietcombank','970407':'Techcombank','970422':'MB Bank','970415':'Vietinbank',
+  '970418':'BIDV','970405':'Agribank','970416':'ACB','970403':'Sacombank','970432':'VPBank',
+  '970423':'TPBank','970441':'VIB','970443':'SHB','970431':'Eximbank','970426':'MSB',
+  '970448':'OCB','970429':'SCB','970437':'HDBank','970440':'SeABank','970449':'LienVietPostBank',
+  '970452':'KienLongBank'
+};
+const REMEMBER_KEY = 'app_remember_login';
+let currentRole = null;
+let currentUsername = '';
+let cloudSaveTimer = null;
+let lastSyncTime = null;
+
+let defaultRooms = [
+  { name:"Phòng 1", oldElec:6009, newElec:6090, oldWater:432, newWater:437 },
+  { name:"Phòng 2", oldElec:16458, newElec:17235, oldWater:311, newWater:316 },
+  { name:"Phòng 3", oldElec:7585, newElec:7661, oldWater:455, newWater:456 },
+  { name:"Phòng 4", oldElec:9416, newElec:9600, oldWater:252, newWater:258 }
+];
+let currentRooms = JSON.parse(JSON.stringify(defaultRooms));
+
+let storage = JSON.parse(localStorage.getItem('app_dien_nuoc_data')) || {
+  settings:{ roundElec:'ceil1000', roundWater:'ceil1000', roundRoomTotal:'ceil1000' },
+  history:{}
+};
+if (!storage.adminPassword) storage.adminPassword = '123456';
+if (!Array.isArray(storage.users) || storage.users.length === 0) {
+  storage.users = [{ username:'user', password:'123', roomName:'Phòng 1', displayName:'Khách thuê' }];
+}
+if (!storage.bankInfo) storage.bankInfo = { bankId:'970436', accountNo:'', accountName:'', template:'compact2' };
+if (!storage.settings) storage.settings = { roundElec:'ceil1000', roundWater:'ceil1000', roundRoomTotal:'ceil1000' };
+if (!storage.history) storage.history = {};
+localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+
+/* ========== FORMAT ========== */
+function formatNumber(num) {
+  if (num === null || num === undefined || isNaN(num) || num === '') return '';
+  return num.toString().replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+function parseNumber(str) {
+  if (!str) return 0;
+  return Number(str.toString().replace(/\./g,'')) || 0;
+}
+function parsePrice(str) {
+  if (!str) return 0;
+  return Number(str.toString().replace(/[^\d]/g,'')) || 0;
+}
+function getBankName(id) { return BANKS[id] || id || 'Ngân hàng'; }
+function formatMonthVN(m) {
+  if (!m) return '';
+  const p = String(m).split('-');
+  if (p.length !== 2) return m;
+  return `T${parseInt(p[1])}/${p[0]}`;
+}
+function formatMonthLong(m) {
+  if (!m) return '';
+  const p = String(m).split('-');
+  if (p.length !== 2) return m;
+  return `Tháng ${parseInt(p[1])}/${p[0]}`;
+}
+
+/* ========== REMEMBER ========== */
+function saveRememberedLogin(u, p) {
+  try {
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify({
+      u: btoa(unescape(encodeURIComponent(u))),
+      p: btoa(unescape(encodeURIComponent(p)))
+    }));
+  } catch(e){}
+}
+function getRememberedLogin() {
+  try {
+    const raw = localStorage.getItem(REMEMBER_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    return {
+      username: decodeURIComponent(escape(atob(d.u))),
+      password: decodeURIComponent(escape(atob(d.p)))
+    };
+  } catch(e){ return null; }
+}
+function clearRememberedLogin() {
+  try { localStorage.removeItem(REMEMBER_KEY); } catch(e){}
+}
+
+/* ========== FETCH ========== */
+async function fetchCloud() {
+  const url = SCRIPT_URL + '?_=' + Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 25000);
+  try {
+    const res = await fetch(url, { method:'GET', mode:'cors', cache:'no-store', redirect:'follow', signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    const text = await res.text();
+    if (!text || text.trim() === '') throw new Error('Server trả về rỗng. Có thể chưa Deploy version mới.');
+    try { return JSON.parse(text); }
+    catch (pe) { throw new Error('Server không trả JSON: ' + text.substring(0, 200)); }
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') throw new Error('Timeout sau 25 giây.');
+    if (err.message === 'Failed to fetch') {
+      throw new Error(
+        'Failed to fetch — không kết nối được server.\n\n' +
+        'Kiểm tra:\n' +
+        '1. Mở Apps Script → chọn TEST_checkFolder → Run\n' +
+        '2. Deploy → Manage → Who has access = Anyone\n' +
+        '3. Deploy → New version'
+      );
+    }
+    throw err;
+  }
+}
+
+function postViaIframe(data) {
+  return new Promise((resolve) => {
+    const iframeName = 'sync_iframe_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.cssText = 'position:absolute;width:0;height:0;border:0;visibility:hidden';
+    document.body.appendChild(iframe);
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = SCRIPT_URL;
+    form.target = iframeName;
+    form.style.display = 'none';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'data';
+    input.value = JSON.stringify(data);
+    form.appendChild(input);
+    document.body.appendChild(form);
+    let resolved = false;
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      setTimeout(() => {
+        try { document.body.removeChild(form); } catch(e){}
+        try { document.body.removeChild(iframe); } catch(e){}
+      }, 300);
+      resolve({ ok: true });
+    };
+    iframe.onload = () => setTimeout(finish, 200);
+    form.submit();
+    setTimeout(finish, 10000);
+  });
+}
+
+/* ========== CLOUD STATUS ========== */
+function setCloudStatus(status, message) {
+  const badge = currentRole === 'user'
+    ? document.getElementById('cloudStatusUser')
+    : document.getElementById('cloudStatusAdmin');
+  if (!badge) return;
+  badge.classList.remove('synced','syncing','error');
+  const txt = badge.querySelector('.txt');
+  if (status === 'syncing') { badge.classList.add('syncing'); txt.innerText = message || 'Đang lưu...'; }
+  else if (status === 'synced') {
+    badge.classList.add('synced');
+    txt.innerText = 'Đã lưu ' + new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+  } else if (status === 'error') { badge.classList.add('error'); txt.innerText = 'Lỗi kết nối'; }
+  else { txt.innerText = message || 'Chưa lưu'; }
+}
+function updateSettingsFooter(msg) {
+  const el = document.getElementById('settingsFooterInfo');
+  if (el) el.innerText = msg;
+}
+function syncSettingsFromDOM() {
+  if (currentRole !== 'admin') return;
+  const usersTbody = document.getElementById('usersBody');
+  if (usersTbody) {
+    const rows = usersTbody.querySelectorAll('tr');
+    const users = [];
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      if (inputs.length >= 4) {
+        users.push({
+          username: inputs[0].value.trim(),
+          password: inputs[1].value,
+          roomName: inputs[2].value.trim(),
+          displayName: inputs[3].value
+        });
+      }
+    });
+    if (users.length > 0) storage.users = users;
+  }
+  const el = id => document.getElementById(id);
+  if (el('settingRoundElec')) {
+    storage.settings = {
+      roundElec: el('settingRoundElec').value,
+      roundWater: el('settingRoundWater').value,
+      roundRoomTotal: el('settingRoundRoomTotal').value
+    };
+  }
+  if (el('bankId')) {
+    storage.bankInfo = {
+      bankId: el('bankId').value,
+      accountNo: el('bankAccountNo').value.trim(),
+      accountName: el('bankAccountName').value.trim().toUpperCase(),
+      template: el('bankTemplate').value
+    };
+  }
+}
+async function saveAllToCloud(showAlert = false) {
+  syncSettingsFromDOM();
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  setCloudStatus('syncing');
+  await postViaIframe(storage);
+  await new Promise(r => setTimeout(r, 1500));
+  try {
+    const cloudData = await fetchCloud();
+    const usersMatch = JSON.stringify(cloudData.users || []) === JSON.stringify(storage.users || []);
+    lastSyncTime = new Date();
+    if (usersMatch) {
+      setCloudStatus('synced');
+      if (showAlert) alert(`✅ Đã lưu và xác minh trên Drive!\nUsers: ${(cloudData.users||[]).length}\nTháng đã lưu: ${Object.keys(cloudData.history||{}).length}`);
+    } else {
+      setCloudStatus('error');
+      if (showAlert) alert(`⚠️ Đã POST nhưng server chưa cập nhật.`);
+    }
+  } catch (ve) {
+    setCloudStatus('synced');
+    if (showAlert) alert("✅ Đã gửi dữ liệu lên Drive!\n\n(Không xác minh được: " + ve.message.split('\n')[0] + ")");
+  }
+}
+function scheduleCloudSave() {
+  if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+  updateSettingsFooter('Đang đồng bộ...');
+  cloudSaveTimer = setTimeout(async () => {
+    await saveAllToCloud(false);
+    updateSettingsFooter('Đã đồng bộ lúc ' + new Date().toLocaleTimeString('vi-VN'));
+  }, 900);
+}
+function onSettingChange() {
+  if (currentRole !== 'admin') return;
+  storage.settings = {
+    roundElec: document.getElementById('settingRoundElec').value,
+    roundWater: document.getElementById('settingRoundWater').value,
+    roundRoomTotal: document.getElementById('settingRoundRoomTotal').value
+  };
+  storage.bankInfo = {
+    bankId: document.getElementById('bankId').value,
+    accountNo: document.getElementById('bankAccountNo').value.trim(),
+    accountName: document.getElementById('bankAccountName').value.trim().toUpperCase(),
+    template: document.getElementById('bankTemplate').value
+  };
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  calculate();
+  scheduleCloudSave();
+}
+async function saveUsersNow() {
+  if (currentRole !== 'admin') return;
+  await saveAllToCloud(true);
+}
+async function testCloudConnection() {
+  showLoading("Đang test kết nối...");
+  try {
+    const data = await fetchCloud();
+    hideLoading();
+    if (data && (data.users !== undefined || data.history !== undefined)) {
+      alert([
+        '✅ KẾT NỐI DRIVE OK',
+        '',
+        'Users trên server: ' + (data.users || []).length,
+        'Tháng đã lưu: ' + Object.keys(data.history || {}).length,
+        'Admin password: ' + (data.adminPassword ? 'Có' : 'Không'),
+        'Bank: ' + (data.bankInfo && data.bankInfo.accountNo ? data.bankInfo.accountNo : 'chưa cấu hình')
+      ].join('\n'));
+    } else {
+      alert('⚠️ Server trả về nhưng không có data.');
+    }
+  } catch (err) {
+    hideLoading();
+    alert('❌ Không kết nối được:\n\n' + err.message);
+  }
+}
+
+/* ========== AUTH ========== */
+async function handleLogin(silent = false) {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if (!u || !p) {
+    if (!silent) alert("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
+    return false;
+  }
+  const btn = document.getElementById('loginBtn');
+  if (btn) { btn.disabled = true; btn.innerText = 'Đang đăng nhập...'; }
+  try {
+    const data = await fetchCloud();
+    if (data) {
+      if (data.adminPassword) storage.adminPassword = data.adminPassword;
+      if (Array.isArray(data.users) && data.users.length > 0) storage.users = data.users;
+      if (data.settings) storage.settings = { ...storage.settings, ...data.settings };
+      if (data.bankInfo) storage.bankInfo = { ...storage.bankInfo, ...data.bankInfo };
+      if (data.history) storage.history = { ...storage.history, ...data.history };
+      localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+    }
+  } catch(e) { console.warn('Sync login failed:', e.message); }
+  if (btn) { btn.disabled = false; btn.innerText = 'Đăng nhập'; }
+
+  let loggedIn = false;
+  if (u === 'admin') {
+    if (p === (storage.adminPassword || '123456')) {
+      currentRole = 'admin'; currentUsername = 'admin'; loggedIn = true;
+    } else { if (!silent) alert("Sai mật khẩu Admin!"); }
+  } else {
+    const found = (storage.users || []).find(x => x.username === u);
+    if (found && found.password === p) {
+      currentRole = 'user'; currentUsername = u; loggedIn = true;
+    } else { if (!silent) alert("Sai tên đăng nhập hoặc mật khẩu!"); }
+  }
+  if (!loggedIn) {
+    if (silent) {
+      clearRememberedLogin();
+      const cb = document.getElementById('rememberMe');
+      if (cb) cb.checked = false;
+    }
+    return false;
+  }
+  if (document.getElementById('rememberMe').checked) saveRememberedLogin(u, p);
+  else clearRememberedLogin();
+  sessionStorage.setItem('current_role', currentRole);
+  sessionStorage.setItem('current_user', currentUsername);
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginUser').value = '';
+  applyRolePermissions();
+  initAppData();
+  return true;
+}
+function handleLogout() {
+  sessionStorage.removeItem('current_role');
+  sessionStorage.removeItem('current_user');
+  currentRole = null;
+  currentUsername = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('userBillView').style.display = 'none';
+  document.getElementById('lockScreen').style.display = 'flex';
+  const r = getRememberedLogin();
+  if (r) {
+    document.getElementById('loginUser').value = r.username;
+    document.getElementById('loginPass').value = r.password;
+    document.getElementById('rememberMe').checked = true;
+  }
+}
+function applyRolePermissions() {
+  if (currentRole === 'admin') {
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('userBillView').style.display = 'none';
+    setInputsDisabled(false);
+    renderUsers();
+    renderHistory();
+    switchAppTab('home');
+  } else {
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('userBillView').style.display = 'block';
+    renderUserBill();
+  }
+}
+function setInputsDisabled(d) {
+  document.querySelectorAll('#totalElecCost,#totalWaterCost,#internetCost').forEach(el => el.disabled = d);
+  document.querySelectorAll('#roomsBody input').forEach(el => el.disabled = d);
+}
+function initAppData() {
+  const m = new Date().toISOString().slice(0,7);
+  const selMonth = document.getElementById('selectedMonth');
+  if (selMonth && !selMonth.value) selMonth.value = m;
+  if (storage.settings) {
+    document.getElementById('settingRoundElec').value = storage.settings.roundElec || 'ceil1000';
+    document.getElementById('settingRoundWater').value = storage.settings.roundWater || 'ceil1000';
+    document.getElementById('settingRoundRoomTotal').value = storage.settings.roundRoomTotal || 'ceil1000';
+  }
+  if (storage.bankInfo) {
+    document.getElementById('bankId').value = storage.bankInfo.bankId || '970436';
+    document.getElementById('bankAccountNo').value = storage.bankInfo.accountNo || '';
+    document.getElementById('bankAccountName').value = storage.bankInfo.accountName || '';
+    document.getElementById('bankTemplate').value = storage.bankInfo.template || 'compact2';
+  }
+  setCloudStatus('synced', 'Sẵn sàng');
+  renderTable();
+  calculate();
+  renderHistory();
+}
+
+/* ========== NAV ========== */
+function switchAppTab(name) {
+  document.querySelectorAll('.app-tab').forEach(el => el.classList.toggle('active', el.dataset.tabContent === name));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === name));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function switchSettingsTab(name, btn) {
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sub-tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('subtab-' + name).classList.add('active');
+}
+
+/* ========== HELPERS ========== */
+function showLoading(t) {
+  const el = document.getElementById('loadingIndicator');
+  el.innerText = t; el.classList.add('show');
+}
+function hideLoading() { document.getElementById('loadingIndicator').classList.remove('show'); }
+function handleInputFormatted(el) {
+  if (currentRole !== 'admin') return;
+  let caret = el.selectionStart;
+  let origLen = el.value.length;
+  el.value = formatNumber(el.value);
+  caret += (el.value.length - origLen);
+  el.setSelectionRange(caret, caret);
+}
+
+/* ========== STATUS ========== */
+const STATUS_LABEL = { unpaid:'Chưa', notified:'Báo rồi', paid:'Đã thu' };
+function getStatus(room) { return room.paymentStatus || 'unpaid'; }
+
+function cyclePaymentStatus(roomName) {
+  if (currentRole !== 'admin') return;
+  const month = document.getElementById('selectedMonth').value;
+  if (!month) return;
+  const data = storage.history[month];
+  if (!data) { alert('Vui lòng lưu tháng trước rồi mới đánh dấu thanh toán.'); return; }
+  const room = data.rooms.find(r => r.name === roomName);
+  if (!room) return;
+  const cur = getStatus(room);
+  let next;
+  if (cur === 'paid') next = 'unpaid';
+  else if (cur === 'notified') next = 'paid';
+  else next = 'paid';
+  room.paymentStatus = next;
+  if (next === 'paid') room.paidAt = new Date().toISOString();
+  else delete room.paidAt;
+  if (next === 'unpaid') delete room.notifiedAt;
+  const cr = currentRooms.find(r => r.name === roomName);
+  if (cr) {
+    cr.paymentStatus = next;
+    cr.paidAt = room.paidAt;
+    cr.notifiedAt = room.notifiedAt;
+  }
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  renderTable();
+  renderHistory();
+  scheduleCloudSave();
+}
+
+/* ========== ĐỔI MK ========== */
+function changeAdminPassword() {
+  if (currentRole !== 'admin') return;
+  const oldPass = document.getElementById('oldAdminPass').value;
+  const newPass = document.getElementById('newAdminPass').value;
+  const confirmPass = document.getElementById('confirmAdminPass').value;
+  if (!oldPass || !newPass || !confirmPass) { alert("Vui lòng nhập đầy đủ 3 ô mật khẩu!"); return; }
+  if (oldPass !== (storage.adminPassword || '123456')) { alert("Mật khẩu Admin hiện tại không đúng!"); return; }
+  if (newPass.length < 4) { alert("Mật khẩu mới phải có ít nhất 4 ký tự!"); return; }
+  if (newPass !== confirmPass) { alert("Mật khẩu xác nhận không khớp!"); return; }
+  storage.adminPassword = newPass;
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  document.getElementById('oldAdminPass').value = '';
+  document.getElementById('newAdminPass').value = '';
+  document.getElementById('confirmAdminPass').value = '';
+  const r = getRememberedLogin();
+  if (r && r.username === 'admin') saveRememberedLogin('admin', newPass);
+  updateSettingsFooter('Đang đồng bộ mật khẩu mới...');
+  scheduleCloudSave();
+  alert("Đã đổi mật khẩu Admin! Đang đồng bộ lên Drive.");
+}
+
+/* ========== USERS ========== */
+function renderUsers() {
+  const tbody = document.getElementById('usersBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  (storage.users || []).forEach((u, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" value="${u.username || ''}" onchange="updateUser(${idx},'username',this.value)"></td>
+      <td><input type="text" value="${u.password || ''}" onchange="updateUser(${idx},'password',this.value)"></td>
+      <td><input type="text" value="${u.roomName || ''}" onchange="updateUser(${idx},'roomName',this.value)"></td>
+      <td><input type="text" value="${u.displayName || ''}" onchange="updateUser(${idx},'displayName',this.value)"></td>
+      <td><button class="fb-btn fb-btn-danger fb-btn-sm" onclick="removeUser(${idx})">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function updateUser(idx, field, val) {
+  if (currentRole !== 'admin') return;
+  if (!storage.users[idx]) return;
+  if (field === 'username') {
+    const v = (val || '').trim();
+    if (v === 'admin') { alert("Không thể đặt username là 'admin'!"); renderUsers(); return; }
+    storage.users[idx][field] = v;
+  } else storage.users[idx][field] = val;
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  scheduleCloudSave();
+}
+function addUser() {
+  if (currentRole !== 'admin') return;
+  storage.users.push({
+    username: 'phong' + (storage.users.length + 1),
+    password: '123',
+    roomName: 'Phòng ' + (storage.users.length + 1),
+    displayName: 'Khách thuê'
+  });
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  renderUsers();
+  scheduleCloudSave();
+}
+function removeUser(idx) {
+  if (currentRole !== 'admin') return;
+  if (!confirm(`Xóa tài khoản "${storage.users[idx]?.username}"?`)) return;
+  storage.users.splice(idx, 1);
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  renderUsers();
+  scheduleCloudSave();
+}
+
+/* ========== TABLE ========== */
+function renderTable() {
+  const tbody = document.getElementById('roomsBody');
+  tbody.innerHTML = '';
+  currentRooms.forEach((r, idx) => {
+    const eUsed = Math.max(0, (r.newElec||0) - (r.oldElec||0));
+    const wUsed = Math.max(0, (r.newWater||0) - (r.oldWater||0));
+    const isDis = currentRole !== 'admin' ? 'disabled' : '';
+    const status = getStatus(r);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" class="input-name" value="${r.name}" onchange="updateRoom(${idx},'name',this.value)" ${isDis}></td>
+      <td><input type="text" value="${formatNumber(r.oldElec)}" oninput="handleInputFormatted(this)" onchange="updateRoom(${idx},'oldElec',this.value)" ${isDis}></td>
+      <td><input type="text" value="${formatNumber(r.newElec)}" oninput="handleInputFormatted(this)" onchange="updateRoom(${idx},'newElec',this.value)" ${isDis}></td>
+      <td class="cell-used" id="usedElec_${idx}">${formatNumber(eUsed)}</td>
+      <td><input type="text" value="${formatNumber(r.oldWater)}" oninput="handleInputFormatted(this)" onchange="updateRoom(${idx},'oldWater',this.value)" ${isDis}></td>
+      <td><input type="text" value="${formatNumber(r.newWater)}" oninput="handleInputFormatted(this)" onchange="updateRoom(${idx},'newWater',this.value)" ${isDis}></td>
+      <td class="cell-used" id="usedWater_${idx}">${formatNumber(wUsed)}</td>
+      <td class="cell-raw" id="rawTotal_${idx}">0 đ</td>
+      <td class="cell-total" id="roundedTotal_${idx}">0 đ</td>
+      <td><button class="status-badge ${status}" onclick="cyclePaymentStatus('${r.name.replace(/'/g,"\\'")}')">${STATUS_LABEL[status]}</button></td>
+      <td class="admin-only"><button class="fb-btn fb-btn-danger fb-btn-sm" onclick="removeRoom(${idx})">
+        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function updateRoom(idx, field, val) {
+  if (currentRole !== 'admin') return;
+  if (field === 'name') currentRooms[idx][field] = val;
+  else currentRooms[idx][field] = parseNumber(val);
+  renderTable();
+  calculate();
+}
+function addRoom() {
+  if (currentRole !== 'admin') return;
+  currentRooms.push({ name:`Phòng ${currentRooms.length+1}`, oldElec:0, newElec:0, oldWater:0, newWater:0, paymentStatus:'unpaid' });
+  renderTable();
+  calculate();
+}
+function removeRoom(idx) {
+  if (currentRole !== 'admin') return;
+  if (confirm("Xóa phòng này?")) {
+    currentRooms.splice(idx, 1);
+    renderTable();
+    calculate();
+  }
+}
+
+/* ========== CALCULATE ========== */
+function applyRoundingRule(val, rule) {
+  if (rule === 'ceil1000') return Math.ceil(val/1000)*1000;
+  if (rule === 'ceil500') return Math.ceil(val/500)*500;
+  if (rule === 'ceil100') return Math.ceil(val/100)*100;
+  if (rule === 'round1000') return Math.round(val/1000)*1000;
+  return Math.round(val);
+}
+function calculate() {
+  const totalElec = parseNumber(document.getElementById('totalElecCost').value);
+  const totalWater = parseNumber(document.getElementById('totalWaterCost').value);
+  const internet = parseNumber(document.getElementById('internetCost').value);
+  const ruleElec = document.getElementById('settingRoundElec').value;
+  const ruleWater = document.getElementById('settingRoundWater').value;
+  const ruleRoomTotal = document.getElementById('settingRoundRoomTotal').value;
+
+  let sumElec = 0, sumWater = 0;
+  currentRooms.forEach((r, idx) => {
+    const e = Math.max(0, (r.newElec||0) - (r.oldElec||0));
+    const w = Math.max(0, (r.newWater||0) - (r.oldWater||0));
+    sumElec += e; sumWater += w;
+    const elE = document.getElementById(`usedElec_${idx}`);
+    const elW = document.getElementById(`usedWater_${idx}`);
+    if (elE) elE.innerText = formatNumber(e);
+    if (elW) elW.innerText = formatNumber(w);
+  });
+
+  document.getElementById('valTotalElecUsed').innerText = `${formatNumber(sumElec)} số`;
+  document.getElementById('valTotalWaterUsed').innerText = `${formatNumber(sumWater)} khối`;
+
+  const finalUnitElec = applyRoundingRule(sumElec > 0 ? totalElec/sumElec : 0, ruleElec);
+  const finalUnitWater = applyRoundingRule(sumWater > 0 ? totalWater/sumWater : 0, ruleWater);
+
+  document.getElementById('valUnitPriceElec').innerText = `${formatNumber(finalUnitElec)} đ`;
+  document.getElementById('valUnitPriceWater').innerText = `${formatNumber(finalUnitWater)} đ`;
+
+  let grandTotal = 0;
+  currentRooms.forEach((r, idx) => {
+    const e = Math.max(0, (r.newElec||0) - (r.oldElec||0));
+    const w = Math.max(0, (r.newWater||0) - (r.oldWater||0));
+    const rawCost = (e * finalUnitElec) + (w * finalUnitWater) + internet;
+    const roundedCost = applyRoundingRule(rawCost, ruleRoomTotal);
+    grandTotal += roundedCost;
+    const elRaw = document.getElementById(`rawTotal_${idx}`);
+    const elRounded = document.getElementById(`roundedTotal_${idx}`);
+    if (elRaw) elRaw.innerText = `${formatNumber(rawCost)} đ`;
+    if (elRounded) elRounded.innerText = `${formatNumber(roundedCost)} đ`;
+  });
+
+  document.getElementById('valGrandTotal').innerText = `${formatNumber(grandTotal)} đ`;
+}
+
+/* ========== ROLLOVER ========== */
+function rollOverPreviousMonth() {
+  if (currentRole !== 'admin') return;
+  const month = document.getElementById('selectedMonth').value;
+  if (!month) return;
+  const [y,m] = month.split('-').map(Number);
+  const prev = new Date(y, m-2, 1);
+  const prevStr = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+  if (!storage.history[prevStr]) {
+    alert(`Không tìm thấy dữ liệu đã lưu của tháng trước (${formatMonthLong(prevStr)}).`);
+    return;
+  }
+  const prevData = storage.history[prevStr];
+  currentRooms = currentRooms.map(r => {
+    const pr = prevData.rooms.find(p => p.name === r.name);
+    if (pr) return { ...r, oldElec:pr.newElec, newElec:pr.newElec, oldWater:pr.newWater, newWater:pr.newWater };
+    return r;
+  });
+  renderTable();
+  calculate();
+  alert(`Đã nạp số cuối ${formatMonthLong(prevStr)} làm số cũ cho ${formatMonthLong(month)}.`);
+}
+
+/* ========== SAVE MONTH ========== */
+async function saveMonthData() {
+  if (currentRole !== 'admin') return;
+  calculate();
+  const month = document.getElementById('selectedMonth').value;
+  if (!month) { alert("Vui lòng chọn tháng!"); return; }
+
+  const oldData = storage.history[month];
+  const roomsSnapshot = currentRooms.map((r, idx) => {
+    const e = Math.max(0, (r.newElec||0) - (r.oldElec||0));
+    const w = Math.max(0, (r.newWater||0) - (r.oldWater||0));
+    const oldRoom = oldData ? oldData.rooms.find(o => o.name === r.name) : null;
+    return {
+      ...r, elecUsed:e, waterUsed:w,
+      roundedCost: document.getElementById(`roundedTotal_${idx}`)?.innerText || '0 đ',
+      paymentStatus: r.paymentStatus || oldRoom?.paymentStatus || 'unpaid',
+      notifiedAt: r.notifiedAt || oldRoom?.notifiedAt,
+      paidAt: r.paidAt || oldRoom?.paidAt
+    };
+  });
+
+  storage.history[month] = {
+    month,
+    totalElecCost: document.getElementById('totalElecCost').value,
+    totalWaterCost: document.getElementById('totalWaterCost').value,
+    internetCost: document.getElementById('internetCost').value,
+    rooms: roomsSnapshot,
+    sumElecUsed: document.getElementById('valTotalElecUsed').innerText,
+    unitPriceElec: document.getElementById('valUnitPriceElec').innerText,
+    sumWaterUsed: document.getElementById('valTotalWaterUsed').innerText,
+    unitPriceWater: document.getElementById('valUnitPriceWater').innerText,
+    grandTotal: document.getElementById('valGrandTotal').innerText
+  };
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  renderHistory();
+
+  showLoading("Đang ghi lên Drive...");
+  await postViaIframe(storage);
+  await new Promise(r => setTimeout(r, 1500));
+
+  try {
+    const cloudData = await fetchCloud();
+    hideLoading();
+    lastSyncTime = new Date();
+    if (cloudData.history && cloudData.history[month]) {
+      setCloudStatus('synced');
+      alert(`✅ Đã lưu ${formatMonthLong(month)} lên Drive!`);
+    } else {
+      setCloudStatus('error');
+      alert(`⚠️ Chưa xác minh được trên server.`);
+    }
+  } catch (ve) {
+    hideLoading();
+    setCloudStatus('synced');
+    alert(`Đã gửi ${formatMonthLong(month)} lên Drive!\n(Không xác minh: ${ve.message.split('\n')[0]})`);
+  }
+}
+
+/* ========== SYNC ========== */
+async function syncFromCloud(silent = false) {
+  if (!silent) showLoading("Đang nạp từ Drive...");
+  else setCloudStatus('syncing');
+  try {
+    const data = await fetchCloud();
+    if (data) {
+      if (data.history) storage.history = { ...storage.history, ...data.history };
+      if (data.settings) storage.settings = { ...storage.settings, ...data.settings };
+      if (data.adminPassword) storage.adminPassword = data.adminPassword;
+      if (Array.isArray(data.users) && data.users.length > 0) storage.users = data.users;
+      if (data.bankInfo) storage.bankInfo = { ...storage.bankInfo, ...data.bankInfo };
+      localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+
+      if (storage.settings) {
+        document.getElementById('settingRoundElec').value = storage.settings.roundElec || 'ceil1000';
+        document.getElementById('settingRoundWater').value = storage.settings.roundWater || 'ceil1000';
+        document.getElementById('settingRoundRoomTotal').value = storage.settings.roundRoomTotal || 'ceil1000';
+      }
+      if (storage.bankInfo) {
+        document.getElementById('bankId').value = storage.bankInfo.bankId || '970436';
+        document.getElementById('bankAccountNo').value = storage.bankInfo.accountNo || '';
+        document.getElementById('bankAccountName').value = storage.bankInfo.accountName || '';
+        document.getElementById('bankTemplate').value = storage.bankInfo.template || 'compact2';
+      }
+      if (currentRole === 'admin') {
+        renderUsers(); renderHistory();
+        const curMonth = document.getElementById('selectedMonth').value;
+        if (storage.history[curMonth]) loadDataFromMonth(curMonth);
+        else { renderTable(); calculate(); }
+      } else if (currentRole === 'user') {
+        renderUserBill();
+      }
+      lastSyncTime = new Date();
+      setCloudStatus('synced');
+      if (!silent) { hideLoading(); alert("Đã đồng bộ dữ liệu mới nhất!"); }
+    } else {
+      if (!silent) hideLoading();
+      setCloudStatus('synced', 'Trống');
+    }
+  } catch (err) {
+    if (!silent) hideLoading();
+    setCloudStatus('error');
+    if (!silent) alert("Không thể tải từ Drive:\n\n" + err.message);
+  }
+}
+
+function onMonthChange() {
+  const month = document.getElementById('selectedMonth').value;
+  if (storage.history[month]) loadDataFromMonth(month);
+}
+function loadDataFromMonth(month) {
+  const data = storage.history[month];
+  if (!data) return;
+  document.getElementById('selectedMonth').value = data.month;
+  document.getElementById('totalElecCost').value = data.totalElecCost || '';
+  document.getElementById('totalWaterCost').value = data.totalWaterCost || '';
+  document.getElementById('internetCost').value = data.internetCost || '70.000';
+  currentRooms = JSON.parse(JSON.stringify(data.rooms));
+  renderTable();
+  calculate();
+  switchAppTab('home');
+}
+async function deleteHistory(month) {
+  if (currentRole !== 'admin') return;
+  if (confirm(`Xóa lịch sử ${formatMonthLong(month)}?`)) {
+    delete storage.history[month];
+    localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+    renderHistory();
+    await saveAllToCloud(false);
+  }
+}
+
+/* ============================================================
+   LỊCH SỬ — ACCORDION TỪNG THÁNG VỚI CHI TIẾT TỪNG PHÒNG
+   ============================================================ */
+function renderHistory() {
+  const container = document.getElementById('historyBody');
+  if (!container) return;
+  container.innerHTML = '';
+  const months = Object.keys(storage.history).sort().reverse();
+
+  if (months.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="empty-title">Chưa có dữ liệu</div>
+        <div class="empty-sub">Bấm "Lưu lên Drive" ở trang chủ để lưu tháng đầu tiên.</div>
+      </div>`;
+    return;
+  }
+
+  months.forEach((m, i) => {
+    const item = storage.history[m];
+    const unitE = parsePrice(item.unitPriceElec);
+    const unitW = parsePrice(item.unitPriceWater);
+    const internet = parseNumber(item.internetCost || 0);
+
+    // Build rows chi tiết từng phòng
+    let roomRows = '';
+    (item.rooms || []).forEach(r => {
+      const eUsed = r.elecUsed !== undefined ? r.elecUsed : Math.max(0, (r.newElec||0) - (r.oldElec||0));
+      const wUsed = r.waterUsed !== undefined ? r.waterUsed : Math.max(0, (r.newWater||0) - (r.oldWater||0));
+      const elecCost = eUsed * unitE;
+      const waterCost = wUsed * unitW;
+      const total = parsePrice(r.roundedCost) || (elecCost + waterCost + internet);
+      const status = getStatus(r);
+      roomRows += `
+        <tr>
+          <td><strong>${r.name}</strong></td>
+          <td>${formatNumber(r.oldElec)}</td>
+          <td>${formatNumber(r.newElec)}</td>
+          <td class="cell-used">${formatNumber(eUsed)}</td>
+          <td class="cell-price">${formatNumber(elecCost)} đ</td>
+          <td>${formatNumber(r.oldWater)}</td>
+          <td>${formatNumber(r.newWater)}</td>
+          <td class="cell-used">${formatNumber(wUsed)}</td>
+          <td class="cell-price">${formatNumber(waterCost)} đ</td>
+          <td class="cell-price">${formatNumber(internet)} đ</td>
+          <td class="cell-total">${formatNumber(total)} đ</td>
+          <td><span class="status-badge ${status}" style="cursor:default">${STATUS_LABEL[status]}</span></td>
+        </tr>`;
+    });
+
+    const adminActions = currentRole === 'admin' ? `
+      <div class="month-actions" onclick="event.stopPropagation()">
+        <button class="fb-btn fb-btn-sm" onclick="loadDataFromMonth('${m}')" title="Sửa tháng này">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="fb-btn fb-btn-sm fb-btn-danger" onclick="deleteHistory('${m}')" title="Xóa tháng này">
+          <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>` : '';
+
+    const card = document.createElement('div');
+    card.className = 'month-card';
+    card.innerHTML = `
+      <div class="month-header ${i === 0 ? 'open' : ''}" onclick="toggleMonthCard('${m}', this)">
+        <div class="month-header-left">
+          <div class="month-chev">
+            <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div style="min-width:0;flex:1">
+            <div class="month-name">${formatMonthLong(m)}</div>
+            <div class="month-summary">
+              Điện: <strong>${item.sumElecUsed || '0 số'}</strong>
+              <span class="dot-sep"></span>
+              Nước: <strong>${item.sumWaterUsed || '0 khối'}</strong>
+              <span class="dot-sep"></span>
+              <strong>${(item.rooms || []).length}</strong> phòng
+            </div>
+          </div>
+        </div>
+        <div class="month-header-right">
+          <div class="month-total">${item.grandTotal || '0 đ'}</div>
+          ${adminActions}
+        </div>
+      </div>
+      <div class="month-detail ${i === 0 ? 'open' : ''}" id="month-detail-${m}">
+        <div class="fb-table-wrap">
+          <table class="fb-table">
+            <thead>
+              <tr>
+                <th rowspan="2">Phòng</th>
+                <th colspan="4">Điện</th>
+                <th colspan="4">Nước</th>
+                <th rowspan="2">Internet</th>
+                <th rowspan="2">Tổng</th>
+                <th rowspan="2">TT</th>
+              </tr>
+              <tr>
+                <th>Cũ</th><th>Mới</th><th>Dùng</th><th>Tiền</th>
+                <th>Cũ</th><th>Mới</th><th>Dùng</th><th>Tiền</th>
+              </tr>
+            </thead>
+            <tbody>${roomRows}</tbody>
+          </table>
+        </div>
+        <div class="month-detail-info">
+          Đơn giá điện: <strong>${item.unitPriceElec || '0 đ'}</strong>
+          <span class="dot-sep"></span>
+          Đơn giá nước: <strong>${item.unitPriceWater || '0 đ'}</strong>
+          <span class="dot-sep"></span>
+          Internet/phòng: <strong>${item.internetCost || '0'} đ</strong>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function toggleMonthCard(month, headerEl) {
+  const detail = document.getElementById('month-detail-' + month);
+  if (!detail) return;
+  const isOpen = detail.classList.toggle('open');
+  headerEl.classList.toggle('open', isOpen);
+}
+
+/* ========== EXPORT ZALO ========== */
+function exportZaloBills() {
+  calculate();
+  const month = document.getElementById('selectedMonth').value;
+  const unitE = document.getElementById('valUnitPriceElec').innerText;
+  const unitW = document.getElementById('valUnitPriceWater').innerText;
+  const net = document.getElementById('internetCost').value;
+  const container = document.getElementById('zaloList');
+  container.innerHTML = '';
+  currentRooms.forEach((r, idx) => {
+    const e = Math.max(0, (r.newElec||0) - (r.oldElec||0));
+    const w = Math.max(0, (r.newWater||0) - (r.oldWater||0));
+    const finalCost = document.getElementById(`roundedTotal_${idx}`).innerText;
+    const msg = `THÔNG BÁO TIỀN PHÒNG - ${r.name.toUpperCase()} (${formatMonthLong(month)})
+--------------------------------------
+Điện: (${formatNumber(r.oldElec)} → ${formatNumber(r.newElec)}) = ${formatNumber(e)} số × ${unitE}
+Nước: (${formatNumber(r.oldWater)} → ${formatNumber(r.newWater)}) = ${formatNumber(w)} khối × ${unitW}
+Internet: ${net} đ
+--------------------------------------
+TỔNG PHẢI ĐÓNG: ${finalCost}
+(Mọi người kiểm tra và gửi theo STK giúp mình nhé!)`;
+    const div = document.createElement('div');
+    div.className = 'zalo-item';
+    div.innerHTML = `<pre>${msg}</pre>
+      <button class="fb-btn fb-btn-sm fb-btn-primary" onclick="navigator.clipboard.writeText(\`${msg.replace(/`/g,'\\`')}\`);alert('Đã chép!')">
+        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Sao chép
+      </button>`;
+    container.appendChild(div);
+  });
+  document.getElementById('zaloPreviewCard').style.display = 'block';
+  document.getElementById('zaloPreviewCard').scrollIntoView({ behavior:'smooth' });
+}
+
+/* ========== USER BILL ========== */
+function renderUserBill() {
+  const content = document.getElementById('userBillContent');
+  if (!content) return;
+  const user = (storage.users || []).find(x => x.username === currentUsername);
+  if (!user) {
+    content.innerHTML = `<div class="fb-card empty-state"><div class="empty-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div class="empty-title">Không tìm thấy tài khoản</div><div class="empty-sub">Vui lòng liên hệ chủ nhà.</div></div>`;
+    return;
+  }
+  const months = Object.keys(storage.history).sort().reverse();
+  if (months.length === 0) {
+    content.innerHTML = `<div class="fb-card empty-state"><div class="empty-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div class="empty-title">Chưa có dữ liệu</div><div class="empty-sub">Chủ nhà chưa cập nhật chỉ số tháng này.</div></div>`;
+    return;
+  }
+  const month = months[0];
+  const data = storage.history[month];
+  const room = data.rooms.find(r => r.name === user.roomName);
+  if (!room) {
+    content.innerHTML = `<div class="fb-card empty-state"><div class="empty-icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="empty-title">Không tìm thấy phòng "${user.roomName}"</div><div class="empty-sub">Vui lòng liên hệ chủ nhà.</div></div>`;
+    return;
+  }
+  const elecUsed = room.elecUsed !== undefined ? room.elecUsed : Math.max(0, (room.newElec||0) - (room.oldElec||0));
+  const waterUsed = room.waterUsed !== undefined ? room.waterUsed : Math.max(0, (room.newWater||0) - (room.oldWater||0));
+  const unitElec = parsePrice(data.unitPriceElec);
+  const unitWater = parsePrice(data.unitPriceWater);
+  const internet = parseNumber(data.internetCost || 0);
+  const elecCost = elecUsed * unitElec;
+  const waterCost = waterUsed * unitWater;
+  const totalNum = parsePrice(room.roundedCost) || (elecCost + waterCost + internet);
+  const status = getStatus(room);
+
+  let bannerHtml = '';
+  if (status === 'paid') {
+    bannerHtml = `
+      <div class="pay-banner paid">
+        <div class="pay-banner-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="pay-banner-text">Đã thanh toán<small>Chủ nhà đã xác nhận nhận đủ tiền ${formatMonthLong(month)}.</small></div>
+      </div>`;
+  } else if (status === 'notified') {
+    bannerHtml = `
+      <div class="pay-banner notified">
+        <div class="pay-banner-icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="pay-banner-text">Chờ chủ nhà xác nhận<small>Bạn đã báo chuyển khoản. Chủ nhà sẽ xác nhận sớm.</small></div>
+        <button class="fb-btn fb-btn-sm" onclick="notifyPayment()">Báo lại</button>
+      </div>`;
+  } else {
+    bannerHtml = `
+      <div class="pay-banner unpaid">
+        <div class="pay-banner-icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="pay-banner-text">Chưa thanh toán<small>Sau khi chuyển khoản, bấm "Đã chuyển tiền" để báo chủ nhà.</small></div>
+        <button class="fb-btn fb-btn-primary" onclick="notifyPayment()">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Đã chuyển tiền
+        </button>
+      </div>`;
+  }
+
+  const bank = storage.bankInfo || {};
+  let qrHtml = '';
+  if (status !== 'paid' && bank.accountNo && bank.accountNo.length > 0 && totalNum > 0) {
+    const desc = `Thanh toan ${user.roomName} thang ${month}`;
+    const qrUrl = `https://img.vietqr.io/image/${bank.bankId}-${bank.accountNo}-${bank.template || 'compact2'}.png?amount=${totalNum}&addInfo=${encodeURIComponent(desc)}&accountName=${encodeURIComponent(bank.accountName || '')}`;
+    qrHtml = `
+      <div class="fb-card">
+        <div class="fb-card-header" style="justify-content:center">
+          <div class="fb-card-title" style="color:var(--blue)">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Quét QR để thanh toán
+          </div>
+        </div>
+        <div class="qr-container">
+          <img src="${qrUrl}" alt="QR thanh toán" loading="lazy">
+          <div class="qr-bank">${getBankName(bank.bankId)}</div>
+          <div class="qr-sub">STK: <strong style="color:var(--text)">${bank.accountNo}</strong></div>
+          <div class="qr-sub">Chủ TK: <strong style="color:var(--text)">${bank.accountName || ''}</strong></div>
+          <div class="qr-sub" style="margin-top:10px">Nội dung: <em>${desc}</em></div>
+          <div class="qr-amount-pill">${formatNumber(totalNum)} đ</div>
+        </div>
+      </div>`;
+  } else if (status !== 'paid' && !bank.accountNo) {
+    qrHtml = `<div class="fb-card empty-state"><div class="empty-icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div><div class="empty-title">Chưa có thông tin thanh toán</div><div class="empty-sub">Chủ nhà chưa cấu hình tài khoản ngân hàng.</div></div>`;
+  }
+
+  const totalBlock = status === 'paid' ? '' : `
+    <div class="bill-total">
+      <span class="bill-total-label">Tổng phải đóng</span>
+      <span class="bill-total-value">${formatNumber(totalNum)} đ</span>
+    </div>`;
+
+  content.innerHTML = `
+    <div class="bill-pc-layout">
+      <div class="bill-pc-main">
+        <div class="bill-hero">
+          <div class="bill-hero-avatar"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="bill-hero-name">${user.roomName}</div>
+          <div class="bill-hero-sub">${user.displayName || user.username}<span class="dot-sep"></span>${formatMonthLong(month)}</div>
+        </div>
+        ${bannerHtml}
+        <div class="fb-card">
+          <div class="fb-card-header">
+            <div class="fb-card-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Chi tiết hóa đơn
+            </div>
+          </div>
+          <div class="fb-card-body">
+            <div class="bill-line">
+              <div class="bill-line-left">
+                <div class="bill-line-icon"><svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                <div>
+                  <div class="bill-line-name">Tiền điện</div>
+                  <div class="bill-line-detail">${formatNumber(elecUsed)} kWh × ${formatNumber(unitElec)} đ</div>
+                </div>
+              </div>
+              <div class="bill-line-amount">${formatNumber(elecCost)} đ</div>
+            </div>
+            <div class="bill-line">
+              <div class="bill-line-left">
+                <div class="bill-line-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
+                <div>
+                  <div class="bill-line-name">Tiền nước</div>
+                  <div class="bill-line-detail">${formatNumber(waterUsed)} m³ × ${formatNumber(unitWater)} đ</div>
+                </div>
+              </div>
+              <div class="bill-line-amount">${formatNumber(waterCost)} đ</div>
+            </div>
+            <div class="bill-line">
+              <div class="bill-line-left">
+                <div class="bill-line-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+                <div>
+                  <div class="bill-line-name">Internet</div>
+                  <div class="bill-line-detail">Phí cố định hàng tháng</div>
+                </div>
+              </div>
+              <div class="bill-line-amount">${formatNumber(internet)} đ</div>
+            </div>
+            ${totalBlock}
+          </div>
+        </div>
+      </div>
+      <div class="bill-pc-side">${qrHtml}</div>
+    </div>`;
+}
+
+/* ========== NOTIFY ========== */
+async function notifyPayment() {
+  if (currentRole !== 'user') return;
+  const user = (storage.users || []).find(x => x.username === currentUsername);
+  if (!user) return;
+  const months = Object.keys(storage.history).sort().reverse();
+  if (months.length === 0) return;
+  const month = months[0];
+  const data = storage.history[month];
+  const room = data.rooms.find(r => r.name === user.roomName);
+  if (!room) return;
+  const cur = getStatus(room);
+  if (cur === 'paid') { alert('Hóa đơn này chủ nhà đã xác nhận thanh toán.'); return; }
+  if (cur === 'notified') {
+    if (!confirm('Bạn đã báo chuyển khoản trước đó. Báo lại?')) return;
+  } else {
+    if (!confirm('Xác nhận bạn đã chuyển khoản đủ số tiền cho chủ nhà?')) return;
+  }
+  try {
+    const cloudData = await fetchCloud();
+    if (cloudData && cloudData.history && cloudData.history[month]) {
+      const cloudRoom = cloudData.history[month].rooms.find(r => r.name === user.roomName);
+      if (cloudRoom) {
+        cloudRoom.paymentStatus = 'notified';
+        cloudRoom.notifiedAt = new Date().toISOString();
+      }
+      storage.history[month] = cloudData.history[month];
+      localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+      showLoading("Đang gửi thông báo...");
+      await postViaIframe(cloudData);
+      hideLoading();
+      setCloudStatus('synced');
+      renderUserBill();
+      alert('✅ Đã báo chủ nhà.');
+      return;
+    }
+  } catch (e) { console.warn('Sync latest failed:', e.message); }
+  room.paymentStatus = 'notified';
+  room.notifiedAt = new Date().toISOString();
+  localStorage.setItem('app_dien_nuoc_data', JSON.stringify(storage));
+  showLoading("Đang gửi thông báo...");
+  await postViaIframe(storage);
+  hideLoading();
+  setCloudStatus('synced');
+  renderUserBill();
+  alert('✅ Đã báo chủ nhà.');
+}
+
+/* ========== BOOT ========== */
+(function boot() {
+  const role = sessionStorage.getItem('current_role');
+  const user = sessionStorage.getItem('current_user');
+  if (role && user) {
+    currentRole = role;
+    currentUsername = user;
+    document.getElementById('lockScreen').style.display = 'none';
+    applyRolePermissions();
+    initAppData();
+    syncFromCloud(true);
+    return;
+  }
+  const r = getRememberedLogin();
+  if (r) {
+    document.getElementById('loginUser').value = r.username;
+    document.getElementById('loginPass').value = r.password;
+    document.getElementById('rememberMe').checked = true;
+    setTimeout(() => handleLogin(true), 150);
+  }
+})();
+</script>
+</body>
+</html>
